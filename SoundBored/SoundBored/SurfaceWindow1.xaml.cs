@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,6 +16,7 @@ using Microsoft.Surface;
 using Microsoft.Surface.Presentation;
 using Microsoft.Surface.Presentation.Controls;
 using Microsoft.Surface.Presentation.Input;
+using Bespoke.Common.Osc;
 
 namespace SoundBored
 {
@@ -23,6 +25,12 @@ namespace SoundBored
     /// </summary>
     public partial class SurfaceWindow1 : SurfaceWindow
     {
+
+        private static int    srcPort = 5566;
+        private static int    dstPort = 6655;
+        private static IPEndPoint src = new IPEndPoint(IPAddress.Loopback, srcPort);
+        private static IPEndPoint dst = new IPEndPoint(IPAddress.Loopback, dstPort);
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -32,6 +40,8 @@ namespace SoundBored
 
             // Add handlers for window availability events
             AddWindowAvailabilityHandlers();
+
+            OscMessage.LittleEndianByteOrder = false;
         }
 
         /// <summary>
@@ -256,5 +266,43 @@ namespace SoundBored
         {
             TransformToEightKeys();
         }
+
+        private void sendNoteOsc(int idx)
+        {
+            OscMessage m = new OscMessage(src, "/soundBored/playNote");
+            m.Append<int>(idx);
+            try
+            {
+                m.Send(dst);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
+        }
+
+        private void handleButtonPress(FrameworkElement fe)
+        {
+            Int32 idx;
+            try
+            {
+                idx = Int32.Parse(fe.Name.Substring(1)); // TODO: Warning: This assumes button-4's name is "B4" ... very brittle
+                sendNoteOsc(idx);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(fe.Name + e.Message + e.StackTrace);
+            }
+
+        }
+
+       
+        private void B_TouchDown(object sender, TouchEventArgs e)
+        {
+            Console.WriteLine("__\n [TouchDown]");
+            FrameworkElement fe = e.Source as FrameworkElement;
+            handleButtonPress(fe);
+        }
+
     }
 }
