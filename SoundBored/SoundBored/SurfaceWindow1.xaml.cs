@@ -26,10 +26,12 @@ namespace SoundBored
     public partial class SurfaceWindow1 : SurfaceWindow
     {
 
-        private static int    srcPort = 5566;
-        private static int    dstPort = 6655;
+        private static int srcPort = 5566;
+        private static int dstPort = 6655;
         private static IPEndPoint src = new IPEndPoint(IPAddress.Loopback, srcPort);
         private static IPEndPoint dst = new IPEndPoint(IPAddress.Loopback, dstPort);
+        private static int CuedButtonNo;
+        private Rectangle[] Buttons = new Rectangle[16];
 
         /// <summary>
         /// Default constructor.
@@ -76,8 +78,6 @@ namespace SoundBored
             ApplicationServices.WindowInteractive -= OnWindowInteractive;
             ApplicationServices.WindowNoninteractive -= OnWindowNoninteractive;
             ApplicationServices.WindowUnavailable -= OnWindowUnavailable;
-
-
         }
 
         /// <summary>
@@ -112,6 +112,7 @@ namespace SoundBored
             //TODO: disable audio, animations here
         }
 
+        //Changes layout to 6 keys 0 - 5
         private void TransformToSixKeys()
         {
             B0.Margin = new Thickness(80, 500, 0, 0);
@@ -187,6 +188,7 @@ namespace SoundBored
             B15.Height = 360;
         }
 
+        //Changes layout to 8 keys 0 - 7
         private void TransformToEightKeys()
         {
             B0.Margin = new Thickness(80, 500, 0, 0);
@@ -262,15 +264,73 @@ namespace SoundBored
             B15.Height = 360;
         }
 
-        private void C_Loaded(object sender, RoutedEventArgs e)
+        //Add an ellipse to Rectangle R
+        private void showVisualCue(Rectangle R)
         {
-            TransformToEightKeys();
+            E.Height = R.Height;
+            E.Width = R.Width;
+
+            int idx = Int32.Parse(R.Name.Substring(1));
+            CuedButtonNo = idx;
+
+            E.Visibility = System.Windows.Visibility.Visible;
+            E.Margin = new Thickness(R.Margin.Left, R.Margin.Top, 0, 0);
         }
 
-        private void sendNoteOsc(int idx)
+        //Hide Ellipse from screen
+        private void hideVisualCue()
         {
-            OscMessage m = new OscMessage(src, "/soundBored/playNote");
+            E.Margin = new Thickness(1000, 1000, 0, 0);
+            E.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        //Called as soon as Canvas C is loaded... Init screen...
+        private void C_Loaded(object sender, RoutedEventArgs e)
+        {
+            Buttons[0] = B0;
+            Buttons[1] = B1;
+            Buttons[2] = B2;
+            Buttons[3] = B3;
+            Buttons[4] = B4;
+            Buttons[5] = B5;
+            Buttons[6] = B6;
+            Buttons[7] = B7;
+            Buttons[8] = B8;
+            Buttons[9] = B9;
+            Buttons[10] = B10;
+            Buttons[11] = B11;
+            Buttons[12] = B12;
+            Buttons[13] = B13;
+            Buttons[14] = B14;
+            Buttons[15] = B15;
+
+
+            TransformToEightKeys();
+            showVisualCue(B3);
+        }
+
+        //Send an OSC Message
+        //Either a playNote mssg if note is cued or an errorNote message if note is played erroneously
+        private bool sendNoteOsc(int idx)
+        {
+            bool isCued = false;
+            OscMessage m;
+
+            if (CuedButtonNo == idx)
+            {
+                m = new OscMessage(src, "/soundBored/playNote");
+                isCued = true;
+                Console.WriteLine("playNote " + idx);
+            }
+            else
+            {
+                m = new OscMessage(src, "/soundBored/errorNote");
+
+                Console.WriteLine("errorNote " + idx);
+            }
+
             m.Append<int>(idx);
+            
             try
             {
                 m.Send(dst);
@@ -279,30 +339,71 @@ namespace SoundBored
             {
                 Console.WriteLine(e.StackTrace);
             }
+
+            return isCued;
         }
 
-        private void handleButtonPress(FrameworkElement fe)
+        //Handles button presses of rectangles
+        private bool handleButtonPress(FrameworkElement fe)
         {
             Int32 idx;
+            bool handled = false;
             try
             {
                 idx = Int32.Parse(fe.Name.Substring(1)); // TODO: Warning: This assumes button-4's name is "B4" ... very brittle
-                sendNoteOsc(idx);
+                handled = sendNoteOsc(idx);
             }
             catch (Exception e)
             {
                 Console.WriteLine(fe.Name + e.Message + e.StackTrace);
             }
 
+            return handled;
         }
 
-       
+        //Handles touch down on rectangles
         private void B_TouchDown(object sender, TouchEventArgs e)
         {
-            Console.WriteLine("__\n [TouchDown]");
+            //TODO: Add colour change or rectangle pressed effect...
+
             FrameworkElement fe = e.Source as FrameworkElement;
-            handleButtonPress(fe);
+            Console.WriteLine("__\n [TouchDown] " + fe.Name);
+            bool handled = handleButtonPress(fe);
+
+            if (handled)
+            {
+                hideVisualCue();
+                showVisualCue(getRandomButton());
+            }
         }
 
+        private void E_TouchDown(object sender, TouchEventArgs e)
+        {
+            //TODO: Add colour change or Ellipse pressed effect...
+
+            bool handled = sendNoteOsc(CuedButtonNo);
+
+            FrameworkElement fe = e.Source as FrameworkElement;
+            Console.WriteLine("__\n [TouchDown] " + fe.Name);
+
+            if (handled)
+            {
+                hideVisualCue();
+                showVisualCue(getRandomButton());
+            }
+        }
+
+        private Rectangle getRandomButton()
+        {
+            int Random = (new Random()).Next(16);
+
+            //JUST A TEMPORARY TESTING LINE OF CODE... CAN'T SEE THESE FOUR KEYS ON MY SCREEN. ;)
+            while (Random == 6 || Random == 7 || Random == 14 || Random == 15)//TESTING
+            {//TESTING
+                Random = (new Random()).Next(16);//TESTING
+            }//TESTING
+
+            return Buttons[Random];
+        }
     }
 }
