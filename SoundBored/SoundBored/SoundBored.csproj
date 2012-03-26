@@ -102,6 +102,8 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="lib\Bespoke.Common.dll" />
+    <Content Include="lib\Bespoke.Common.Osc.dll" />
     <Content Include="Resources\icon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
