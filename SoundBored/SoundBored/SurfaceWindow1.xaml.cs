@@ -35,8 +35,10 @@ namespace SoundBored
 
         private static int EIdx;
         private static int CuedButtonNo;
+        private static bool IsPlayed;
 
         private static int NoOfKeys = 26;
+        private HashSet<int> UnusedKeys;
         private Rectangle[] Buttons = new Rectangle[26];
 
         private Timer AppTimer;
@@ -44,11 +46,16 @@ namespace SoundBored
         private static int Tempo = 120;
         private static double TimerIncrement;
 
-        private static const double Sixteenth = 125;
-        private static const double Eighth = 250;
-        private static const double Quarter = 500;
-        private static const double Half = 1000;
-        private static const double Whole = 2000;
+        private const double Sixteenth = 125;
+        private const double Eighth = 250;
+        private const double Quarter = 500;
+        private const double Half = 1000;
+        private const double Whole = 2000;
+
+        private static PatternUnit CurrentPatternUnit;
+        private static int CurrentNote;
+        private static int CurrentDuration;
+        private static int CurrentNoteIndex;
 
         //ArrayList Pattern has elements of type PatternUnit converted to Object, so don't forget data conversions when adding or removing elements from Pattern
         private ArrayList Pattern = new ArrayList();
@@ -167,12 +174,15 @@ namespace SoundBored
             StartTest();
             }
 
-        //Changes layout to 6 keys 0 - 5
+        //Changes layout to 26 keys 0 - 25
         private void TransformToThirteenKeys()
         {
+            UnusedKeys = new HashSet<int>();
+
             int LeftAmount = 65;
             int TopAmount = 500;
             int LeftIncrement = 140;
+
             for (int i = 0; i < NoOfKeys; i++)
             {
                 if (i == 13)
@@ -190,9 +200,11 @@ namespace SoundBored
             }
         }
 
-        //Changes layout to 8 keys 0 - 7
+        //Changes layout to 8 keys 0 - 7 & 13 - 20
         private void TransformToEightKeys()
         {
+            UnusedKeys = new HashSet<int>();
+            
             int LeftAmount = 80;
             int TopAmount = 500;
             int LeftIncrement = 230;
@@ -204,6 +216,7 @@ namespace SoundBored
                     Buttons[i].Width = 180;
                     Buttons[i].Height = 360;
                     Buttons[i].Visibility = System.Windows.Visibility.Collapsed;
+                    UnusedKeys.Add(i);
                     continue;
                 }
                 else if (i == 13)
@@ -224,6 +237,8 @@ namespace SoundBored
         //Changes layout to 6 keys 0 - 5 & 13 - 18
         private void TransformToSixKeys()
         {
+            UnusedKeys = new HashSet<int>();
+
             int LeftAmount = 80;
             int TopAmount = 500;
             int LeftIncrement = 316;
@@ -235,6 +250,7 @@ namespace SoundBored
                     Buttons[i].Width = 180;
                     Buttons[i].Height = 360;
                     Buttons[i].Visibility = System.Windows.Visibility.Collapsed;
+                    UnusedKeys.Add(i);
                     continue;
                 }
                 else if (i == 13)
@@ -253,25 +269,51 @@ namespace SoundBored
         }
 
         //Add an ellipse to Rectangle R
-        private void showVisualCue(Rectangle R)
+        private void ShowVisualCue(Rectangle R)
         {
-            E.Height = R.Height;
-            E.Width = R.Width;
-
-            int idx = Int32.Parse(R.Name.Substring(1));
-            CuedButtonNo = idx;
-            EIdx = idx;
-
-            E.Visibility = System.Windows.Visibility.Visible;
-            E.Margin = new Thickness(R.Margin.Left, R.Margin.Top, 0, 0);
+            //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            R.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                new Action(
+                    delegate()
+                    {
+                        int idx = Int32.Parse(R.Name.Substring(1));
+                        CuedButtonNo = idx;
+                        EIdx = idx;
+                    }
+                ));
+            
+            //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            E.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                new Action(
+                    delegate()
+                    {
+                        E.Height = R.Height;
+                        E.Width = R.Width;
+                        E.Visibility = System.Windows.Visibility.Visible;
+                        E.Margin = new Thickness(R.Margin.Left, R.Margin.Top, 0, 0);
+                        E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0xFF, 0xFA, 0xFC));
+                    }
+                ));
         }
 
         //Hide Ellipse from screen
-        private void hideVisualCue()
+        private void HideVisualCue()
         {
             EIdx = -1;
-            E.Margin = new Thickness(1000, 1000, 0, 0);
-            E.Visibility = System.Windows.Visibility.Collapsed;
+            IsPlayed = false;
+
+            //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            E.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                new Action(
+                    delegate()
+                    {
+                        E.Margin = new Thickness(10000, 10000, 0, 0);
+                        E.Visibility = System.Windows.Visibility.Collapsed;
+                    }
+                ));
         }
 
         //Send an OSC Message
@@ -281,11 +323,30 @@ namespace SoundBored
             bool isCued = false;
             OscMessage m;
 
+            if (CuedButtonNo != EIdx)
+            {
+                return false;
+            }
+
             if (CuedButtonNo == idx)
             {
                 m = new OscMessage(src, "/soundBored/playNote");
                 isCued = true;
                 Console.WriteLine("playNote " + idx);
+                IsPlayed = true;
+
+                //May Have Solved Multihit MultiNote problem with this as well as original problem which was error notes on hitting ellipse more than once per note duration...
+                CuedButtonNo = -1;
+
+                //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+                E.Dispatcher.Invoke(
+                    System.Windows.Threading.DispatcherPriority.Normal,
+                    new Action(
+                        delegate()
+                        {
+                            E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0x1E, 0x90, 0xFF));
+                        }
+                    ));
             }
             else
             {
@@ -335,11 +396,11 @@ namespace SoundBored
             Console.WriteLine("__\n [TouchDown] " + fe.Name);
             bool handled = handleButtonPress(fe);
 
-            if (handled)
-            {
-                hideVisualCue();
-                showVisualCue(getRandomButton());
-            }
+            //if (handled)
+            //{
+            //    HideVisualCue();
+            //    ShowVisualCue(getRandomButton());
+            //}
         }
 
         private void E_TouchDown(object sender, TouchEventArgs e)
@@ -351,11 +412,11 @@ namespace SoundBored
             FrameworkElement fe = e.Source as FrameworkElement;
             Console.WriteLine("__\n [TouchDown] " + fe.Name + " " + EIdx);
 
-            if (handled)
-            {
-                hideVisualCue();
-                showVisualCue(getRandomButton());
-            }
+            //if (handled)
+            //{
+            //    HideVisualCue();
+            //    ShowVisualCue(getRandomButton());
+            //}
         }
 
         private Rectangle getRandomButton()
@@ -371,15 +432,76 @@ namespace SoundBored
             return Buttons[Random];
         }
 
+        private ArrayList GenerateRandomPattern(int Difficulty, int Length)
+        {
+            //TODO Start at a random MIDI Note Number and do random walk.
+            //Therefore Note would have to be translated in terms of number of keys by doing a Mod operation on the number of keys
+            //Also Octave would have to slide as a sliding window according to when notes reach the edge of the octave when next note goes into next octave
+
+            ArrayList NewPattern = new ArrayList();
+            PatternUnit TempPatternUnit;
+            Random RandNote = new Random();
+            Random RandDuration = new Random();
+
+            int TempNote = -1, MinNote, MaxNote;
+
+            for (int index = 0; index < Length; index++)
+            {
+                do
+                {
+                    if (NewPattern.Count == 0)
+                    {
+                        TempNote = RandNote.Next(26);
+                    }
+                    MinNote = TempNote;
+                    MaxNote = TempNote;
+
+                    if (MinNote - Difficulty < -1)
+                    {
+                        MinNote = -1;
+                    }
+                    else
+                    {
+                        MinNote -= Difficulty;
+                    }
+
+                    if (MaxNote + Difficulty > 26)
+                    {
+                        MaxNote = 26;
+                    }
+                    else
+                    {
+                        MaxNote += Difficulty;
+                    }
+
+                    TempNote = RandNote.Next(MinNote, MaxNote);
+                }
+                //while (UnusedKeys.Contains(TempNote));
+                while (UnusedKeys.Contains(TempNote) || ((TempNote > 9 && TempNote < 13) || (TempNote > 22 && TempNote < 26))) ; //COMMENT OUT ON REAL USE ON SURFACE
+
+                TempPatternUnit = new PatternUnit(TempNote, (int) Math.Pow(2.0, RandDuration.Next(1, 5)));
+                NewPattern.Add(TempPatternUnit);
+
+                Console.Write("N:{0}, D:{1} : ", TempPatternUnit.Note, TempPatternUnit.Duration);
+            }
+            Console.WriteLine();
+            
+            return NewPattern;
+        }
+
         private void StartTest()
         {
             //TODO What happens when you click Start Test
             TimerIncrement = Sixteenth;
             AppTimer = new Timer(TimerIncrement);
 
-            AppTimer.Elapsed += HandleTimerElapsedEvent;
+            Pattern = GenerateRandomPattern(4, 50);
+            CurrentDuration = 0;
+            CurrentNoteIndex = -1;
 
-            showVisualCue(getRandomButton());
+            AppTimer.Elapsed += HandleTimerElapsedEvent;
+            AppTimer.Start();
+            AppTimer.Interval = TimerIncrement;
         }
 
         private void StopTest()
@@ -410,18 +532,101 @@ namespace SoundBored
 
         }
 
+        private void ShowTestResults()
+        { 
+            //TODO Display Results of the Test
+
+        }
+
         private void HandleTimerElapsedEvent(Object Source, ElapsedEventArgs e)
         { 
             //TODO What happens when AppTimer's Elapsed Event Fire
 
+            if (CurrentDuration == 0)
+            {
+                if (CurrentNoteIndex == Pattern.Count - 1)
+                {
+                    AppTimer.Enabled = false;
+                    HideVisualCue();
+                    ShowTestResults();
 
+                    Console.WriteLine("Test Done : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
+                    return;
+                }
+
+                CurrentNoteIndex++;
+                CurrentPatternUnit = new PatternUnit((PatternUnit)Pattern[CurrentNoteIndex]);
+                CurrentNote = CurrentPatternUnit.Note;
+                CurrentDuration = CurrentPatternUnit.Duration;
+                IsPlayed = false;
+
+                Console.WriteLine("CDur == 0 : CN++, Cnot, Cdur, IP = F, HiVisCu : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
+
+                HideVisualCue();
+                
+                if (CurrentNote >= 0) //Rests Should Not Trigger Visual Cue
+                {
+                    Console.WriteLine("CNot >= 0 : ShVisCu : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
+                    ShowVisualCue(Buttons[CurrentNote]);
+                }
+            }
+            else if (CurrentNoteIndex < 0)
+            {
+                Console.WriteLine("CNI < 0 : CDur = 0 : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
+                CurrentDuration = 0;
+            }
+            else if (IsPlayed && EIdx >= 0)
+            {
+                Console.WriteLine("IP == T & EIdx >=0 : CDur-- : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
+                CurrentDuration--;
+            }
+            else if (IsPlayed)
+            {
+                Console.WriteLine("IP : CDur--" + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
+                CurrentDuration--;
+            }
+            else if (!IsPlayed && CurrentNote == -1)
+            {
+                Console.WriteLine("!IP & CNot ==-1 : CDur--" + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
+                CurrentDuration--;
+            }
+            else
+            {
+                Console.WriteLine("Else... ??? : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
+            }
         }
     }
 
     class PatternUnit
     {
-        private int Note;
-        private int Duration;
+        private int note;
+        private int duration;
+
+        public int Note
+        {
+            get
+            {
+                return note;
+            }
+
+            set
+            {
+                note = value;
+            }
+        }
+
+        public int Duration
+        {
+            get
+            {
+                return duration;
+            }
+
+            set
+            {
+                duration = value;
+            }
+        }
 
         public PatternUnit()
         { 
@@ -434,24 +639,10 @@ namespace SoundBored
             this.Duration = Duration;
         }
 
-        public int GetNote()
+        public PatternUnit(PatternUnit PattrnUnit)
         {
-            return this.Note;
-        }
-
-        public void SetNote(int Note)
-        {
-            this.Note = Note;
-        }
-
-        public int GetDuration()
-        {
-            return this.Duration;
-        }
-
-        public void SetDuration(int Duration)
-        {
-            this.Duration = Duration;
+            this.Note = PattrnUnit.Note;
+            this.Duration = PattrnUnit.Duration;
         }
     }
 }
