@@ -22,6 +22,16 @@
             <Rectangle Height="400" HorizontalAlignment="Left" Name="B13" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776"/>
             <Rectangle Height="400" HorizontalAlignment="Left" Name="B14" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
             <Rectangle Height="400" HorizontalAlignment="Left" Name="B15" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B16" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B17" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B18" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B19" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B20" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B21" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B22" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776"/>
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B23" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B24" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
+            <Rectangle Height="400" HorizontalAlignment="Left" Name="B25" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="B_TouchDown" Fill="#FF142776" />
             <Ellipse Height="400" HorizontalAlignment="Left" Name="E" Stroke="Black" VerticalAlignment="Top" Width="150" Canvas.Left="0" Canvas.Top="0" TouchDown="E_TouchDown" Fill="#A0FFFAFC" />
         </Canvas>
     </Grid>
