@@ -18,6 +18,7 @@ using Microsoft.Surface.Presentation.Controls;
 using Microsoft.Surface.Presentation.Input;
 using Bespoke.Common.Osc;
 using System.Collections;
+using System.Timers;
 
 namespace SoundBored
 {
@@ -31,10 +32,23 @@ namespace SoundBored
         private static int dstPort = 6655;
         private static IPEndPoint src = new IPEndPoint(IPAddress.Loopback, srcPort);
         private static IPEndPoint dst = new IPEndPoint(IPAddress.Loopback, dstPort);
+
         private static int EIdx;
         private static int CuedButtonNo;
+
         private static int NoOfKeys = 26;
         private Rectangle[] Buttons = new Rectangle[26];
+
+        private Timer AppTimer;
+
+        private static int Tempo = 120;
+        private static double TimerIncrement;
+
+        private static const double Sixteenth = 125;
+        private static const double Eighth = 250;
+        private static const double Quarter = 500;
+        private static const double Half = 1000;
+        private static const double Whole = 2000;
 
         //ArrayList Pattern has elements of type PatternUnit converted to Object, so don't forget data conversions when adding or removing elements from Pattern
         private ArrayList Pattern = new ArrayList();
@@ -149,8 +163,9 @@ namespace SoundBored
             Buttons[25] = B25;
 
             TransformToThirteenKeys();
-            showVisualCue(getRandomButton());
-        }
+
+            StartTest();
+            }
 
         //Changes layout to 6 keys 0 - 5
         private void TransformToThirteenKeys()
@@ -354,6 +369,52 @@ namespace SoundBored
             //}//TESTING
 
             return Buttons[Random];
+        }
+
+        private void StartTest()
+        {
+            //TODO What happens when you click Start Test
+            TimerIncrement = Sixteenth;
+            AppTimer = new Timer(TimerIncrement);
+
+            AppTimer.Elapsed += HandleTimerElapsedEvent;
+
+            showVisualCue(getRandomButton());
+        }
+
+        private void StopTest()
+        {
+            //TODO What happens when you click Stop Test
+
+
+        }
+
+        private void LoadPattern()
+        {
+            //TODO What happens when you click Load New Pattern
+
+
+        }
+
+        private void Demo()
+        {
+            //TODO What happens when you click Demo
+
+
+        }
+
+        private void FreePlay()
+        {
+            //TODO What happens when you click Free Play
+
+
+        }
+
+        private void HandleTimerElapsedEvent(Object Source, ElapsedEventArgs e)
+        { 
+            //TODO What happens when AppTimer's Elapsed Event Fire
+
+
         }
     }
 
