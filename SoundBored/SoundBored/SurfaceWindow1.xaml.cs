@@ -266,11 +266,6 @@ namespace SoundBored
             bool isCued = false;
             OscMessage m;
 
-            if (CuedButtonNo != EIdx)
-            {
-                return false;
-            }
-
             if (CuedButtonNo == idx)
             {
                 m = new OscMessage(src, "/soundBored/playNote");
@@ -339,7 +334,7 @@ namespace SoundBored
             bool handled = sendNoteOsc(EIdx);
 
             FrameworkElement fe = e.Source as FrameworkElement;
-            Console.WriteLine("__\n [TouchDown] " + fe.Name);
+            Console.WriteLine("__\n [TouchDown] " + fe.Name + " " + EIdx);
 
             if (handled)
             {
