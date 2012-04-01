@@ -40,17 +40,19 @@ namespace SoundBored
         private static int NoOfKeys = 26;
         private HashSet<int> UnusedKeys;
         private Rectangle[] Buttons = new Rectangle[26];
+        private Ellipse E = new Ellipse();
 
         private Timer AppTimer;
 
         private static int Tempo = 120;
         private static double TimerIncrement;
 
-        private const double Sixteenth = 125;
-        private const double Eighth = 250;
-        private const double Quarter = 500;
-        private const double Half = 1000;
-        private const double Whole = 2000;
+        private static double ThirtySecondth = 62.5;
+        private static double Sixteenth = 125;
+        private static double Eighth = 250;
+        private static double Quarter = 500;
+        private static double Half = 1000;
+        private static double Whole = 2000;
 
         private static PatternUnit CurrentPatternUnit;
         private static int CurrentNote;
@@ -142,46 +144,56 @@ namespace SoundBored
         //Called as soon as Canvas C is loaded... Init screen...
         private void C_Loaded(object sender, RoutedEventArgs e)
         {
-            Buttons[0] = B0;
-            Buttons[1] = B1;
-            Buttons[2] = B2;
-            Buttons[3] = B3;
-            Buttons[4] = B4;
-            Buttons[5] = B5;
-            Buttons[6] = B6;
-            Buttons[7] = B7;
-            Buttons[8] = B8;
-            Buttons[9] = B9;
-            Buttons[10] = B10;
-            Buttons[11] = B11;
-            Buttons[12] = B12;
-            Buttons[13] = B13;
-            Buttons[14] = B14;
-            Buttons[15] = B15;
-            Buttons[16] = B16;
-            Buttons[17] = B17;
-            Buttons[18] = B18;
-            Buttons[19] = B19;
-            Buttons[20] = B20;
-            Buttons[21] = B21;
-            Buttons[22] = B22;
-            Buttons[23] = B23;
-            Buttons[24] = B24;
-            Buttons[25] = B25;
+
+            for (int i = 0; i < 26; i++)
+            {
+                Buttons[i] = new Rectangle();
+                InitializeRectangle(i);
+            }
+
+            InitializeEllipse();
 
             TransformToThirteenKeys();
 
             StartTest();
-            }
+        }
+
+        private void InitializeEllipse()
+        {
+            E.Name = "E";
+            E.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            E.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            E.Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0xFF, 0xFA, 0xFC));
+            Canvas.SetLeft(E, 0.0);
+            Canvas.SetTop(E, 0.0);
+            E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0xFF, 0xFA, 0xFC));
+            E.TouchDown += E_TouchDown;
+        }
+
+        private void InitializeRectangle(int i)
+        {
+            Buttons[i].Name = "B" + i;
+            Buttons[i].HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            Buttons[i].VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            Buttons[i].Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x14, 0x27, 0x76));
+            Canvas.SetLeft(Buttons[i], 0.0);
+            Canvas.SetTop(Buttons[i], 0.0);
+            Buttons[i].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x14, 0x27, 0x76));
+            Buttons[i].TouchDown += B_TouchDown;
+        }
 
         //Changes layout to 26 keys 0 - 25
         private void TransformToThirteenKeys()
         {
             UnusedKeys = new HashSet<int>();
 
+            C.Children.Clear();
+
             int LeftAmount = 65;
             int TopAmount = 500;
             int LeftIncrement = 140;
+            int RectWidth = 110;
+            int RectHeight = 360;
 
             for (int i = 0; i < NoOfKeys; i++)
             {
@@ -191,20 +203,26 @@ namespace SoundBored
                     TopAmount = 60;
                 }
 
+                Buttons[i].Width = RectWidth;
+                Buttons[i].Height = RectHeight;
                 Buttons[i].Margin = new Thickness(LeftAmount, TopAmount, 0, 0);
-                Buttons[i].Width = 110;
-                Buttons[i].Height = 360;
                 Buttons[i].Visibility = System.Windows.Visibility.Visible;
+
+                C.Children.Add(Buttons[i]);
 
                 LeftAmount += LeftIncrement;
             }
+
+            C.Children.Add(E);
         }
 
         //Changes layout to 8 keys 0 - 7 & 13 - 20
         private void TransformToEightKeys()
         {
             UnusedKeys = new HashSet<int>();
-            
+
+            C.Children.Clear();
+
             int LeftAmount = 80;
             int TopAmount = 500;
             int LeftIncrement = 230;
@@ -230,14 +248,20 @@ namespace SoundBored
                 Buttons[i].Height = 360;
                 Buttons[i].Visibility = System.Windows.Visibility.Visible;
 
+                C.Children.Add(Buttons[i]);
+
                 LeftAmount += LeftIncrement;
             }
+
+            C.Children.Add(E);
         }
 
         //Changes layout to 6 keys 0 - 5 & 13 - 18
         private void TransformToSixKeys()
         {
             UnusedKeys = new HashSet<int>();
+
+            C.Children.Clear();
 
             int LeftAmount = 80;
             int TopAmount = 500;
@@ -264,8 +288,12 @@ namespace SoundBored
                 Buttons[i].Height = 360;
                 Buttons[i].Visibility = System.Windows.Visibility.Visible;
 
+                C.Children.Add(Buttons[i]);
+
                 LeftAmount += LeftIncrement;
             }
+
+            C.Children.Add(E);
         }
 
         //Add an ellipse to Rectangle R
@@ -492,7 +520,7 @@ namespace SoundBored
         private void StartTest()
         {
             //TODO What happens when you click Start Test
-            TimerIncrement = Sixteenth;
+            TimerIncrement = ThirtySecondth;
             AppTimer = new Timer(TimerIncrement);
 
             Pattern = GenerateRandomPattern(4, 50);
