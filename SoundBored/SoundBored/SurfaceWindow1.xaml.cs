@@ -48,8 +48,8 @@ namespace SoundBored
         private Label TitleLabel = new Label();
         private SurfaceButton LoginButton = new SurfaceButton();
         private SurfaceButton FreePlayButton = new SurfaceButton();
-        private TextBox username = new TextBox();
-        private TextBox password = new TextBox();
+        private SurfaceTextBox username = new SurfaceTextBox();
+        private SurfaceTextBox password = new SurfaceTextBox();
         
         private Timer AppTimer;
 
@@ -168,9 +168,10 @@ namespace SoundBored
             int numKeys;
 
             FreePlayMode = FreePlay;
+            BigKeys = Bigkeys;
 
             if (BigKeys)
-                numKeys = 26; // or 24?
+                numKeys = 26;
             else
                 numKeys = NoOfKeys;
             for (int i = 0; i < numKeys; i++)
@@ -187,9 +188,13 @@ namespace SoundBored
             InitializeEllipse();
 
             if (BigKeys)
+            {
                 TransformToThirteenKeys();
+            }
             else
+            {
                 TransformToNKeys(NoOfKeys);
+            }
 
             if (!FreePlayMode)
             {
@@ -817,7 +822,7 @@ namespace SoundBored
         private void FreePlay(object sender, RoutedEventArgs e)
         {
             //TODO What happens when you click Free Play
-            InitializeKeyInterface(true, true);
+            InitializeKeyInterface(false, true);
         }
 
         private void ShowTestResults()
