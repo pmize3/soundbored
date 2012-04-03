@@ -19,6 +19,7 @@ using Microsoft.Surface.Presentation.Input;
 using Bespoke.Common.Osc;
 using System.Collections;
 using System.Timers;
+using System.IO;
 
 namespace SoundBored
 {
@@ -42,9 +43,13 @@ namespace SoundBored
         private Rectangle[] Buttons = new Rectangle[NoOfKeys];
         private Ellipse E = new Ellipse();
 
-        private Label label1, label2, label3 = new Label();
-        private Button button1, button2 = new Button();
-        private TextBox username, password = new TextBox();
+        private Label UserNameLabel = new Label();
+        private Label PasswordLabel = new Label();
+        private Label TitleLabel = new Label();
+        private Button LoginButton = new Button();
+        private Button FreePlayButton = new Button();
+        private TextBox username = new TextBox();
+        private TextBox password = new TextBox();
         
         private Timer AppTimer;
 
@@ -154,12 +159,16 @@ namespace SoundBored
         //Called as soon as Canvas C is loaded... Init screen...
         private void C_Loaded(object sender, RoutedEventArgs e)
         {
-            //Boolean[] initVal = StartSplashScreen();
-            
+            StartSplashScreen();
+        }
+
+        private void InitializeKeyInterface(bool Bigkeys, bool FreePlay)
+        {
             int tmp;
             int numKeys;
-            //BigKeys = initVal[0];
-            //FreePlayMode = initVal[1];
+
+            FreePlayMode = FreePlay;
+
             if (BigKeys)
                 numKeys = 26; // or 24?
             else
@@ -167,7 +176,7 @@ namespace SoundBored
             for (int i = 0; i < numKeys; i++)
             {
                 Buttons[i] = new Rectangle();
-                tmp = i % (numKeys/2);
+                tmp = i % (numKeys / 2);
                 if (tmp == 1 || tmp == 3 || tmp == 6 || tmp == 8 || tmp == 10 || tmp == 13 || tmp == 15 || tmp == 18 || tmp == 20 || tmp == 22)
                     InitializeBlackKey(i);
                 else
@@ -182,65 +191,63 @@ namespace SoundBored
             else
                 TransformToNKeys(NoOfKeys);
 
-            if(!FreePlayMode)
+            if (!FreePlayMode)
+            {
                 StartTest();
+            }
         }
 
-        private Boolean[] StartSplashScreen()
+        private void StartSplashScreen()
         {
             InitializeLabel();
             InitializeText();
             InitializeButton();
-            Boolean[] retVal = new Boolean[2];
-            retVal[0] = true;
-            retVal[1] = true;
-            return retVal;
         }
 
         private void InitializeLabel()
         {
-            label1.Name = "username";
-            label1.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            label1.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            label1.Content = "Username";
-            label1.Height = 40;
-            label1.Width = 96;
-            label1.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+            UserNameLabel.Name = "username";
+            UserNameLabel.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            UserNameLabel.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            UserNameLabel.Content = "Username";
+            UserNameLabel.Height = 40;
+            UserNameLabel.Width = 96;
+            UserNameLabel.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
 
-            label2.Name = "password";
-            label2.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            label2.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            label2.Content = "Password";
-            label2.Height = 40;
-            label2.Width = 96;
-            label2.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+            PasswordLabel.Name = "password";
+            PasswordLabel.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            PasswordLabel.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            PasswordLabel.Content = "Password";
+            PasswordLabel.Height = 40;
+            PasswordLabel.Width = 96;
+            PasswordLabel.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
 
-            label3.Name = "Title";
-            label3.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            label3.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            label3.Content = "Sound Bored";
-            label3.Height = 124;
-            label3.Width = 252;
-            label3.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0xFF, 0xFF));
-            label3.FontSize = 40;
+            TitleLabel.Name = "Title";
+            TitleLabel.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            TitleLabel.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            TitleLabel.Content = "Sound Bored";
+            TitleLabel.Height = 124;
+            TitleLabel.Width = 252;
+            TitleLabel.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0xFF, 0xFF));
+            TitleLabel.FontSize = 40;
 
-            Canvas.SetLeft(label1, 0.0);
-            Canvas.SetLeft(label2, 0.0);
-            Canvas.SetLeft(label3, 0.0);
-            Canvas.SetTop(label1, 0.0);
-            Canvas.SetTop(label2, 0.0);
-            Canvas.SetTop(label3, 0.0);
+            Canvas.SetLeft(UserNameLabel, 0.0);
+            Canvas.SetLeft(PasswordLabel, 0.0);
+            Canvas.SetLeft(TitleLabel, 0.0);
+            Canvas.SetTop(UserNameLabel, 0.0);
+            Canvas.SetTop(PasswordLabel, 0.0);
+            Canvas.SetTop(TitleLabel, 0.0);
 
-            label1.Margin = new Thickness(1104, 289, 0, 0);
-            label1.Visibility = System.Windows.Visibility.Visible;
-            label2.Margin = new Thickness(1104, 338, 0, 0);
-            label2.Visibility = System.Windows.Visibility.Visible;
-            label3.Margin = new Thickness(540, 258, 0, 0);
-            label3.Visibility = System.Windows.Visibility.Visible;
+            UserNameLabel.Margin = new Thickness(1104, 289, 0, 0);
+            UserNameLabel.Visibility = System.Windows.Visibility.Visible;
+            PasswordLabel.Margin = new Thickness(1104, 338, 0, 0);
+            PasswordLabel.Visibility = System.Windows.Visibility.Visible;
+            TitleLabel.Margin = new Thickness(540, 258, 0, 0);
+            TitleLabel.Visibility = System.Windows.Visibility.Visible;
 
-            C.Children.Add(label1);
-            C.Children.Add(label2);
-            C.Children.Add(label3);
+            C.Children.Add(UserNameLabel);
+            C.Children.Add(PasswordLabel);
+            C.Children.Add(TitleLabel);
         }
 
         private void InitializeText()
@@ -273,34 +280,36 @@ namespace SoundBored
 
         private void InitializeButton()
         {
-            button1.Name = "Login";
-            button1.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            button1.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            button1.Height = 30;
-            button1.Width = 90;
-            button1.Content = "Login";
-            button1.FontSize = 14;
+            LoginButton.Name = "Login";
+            LoginButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            LoginButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            LoginButton.Height = 30;
+            LoginButton.Width = 90;
+            LoginButton.Content = "Login";
+            LoginButton.FontSize = 14;
+            LoginButton.Click += Login_Clicked;
 
-            button2.Name = "FreePlay";
-            button2.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            button2.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            button2.Height = 30;
-            button2.Width = 90;
-            button2.Content = "Free Play!";
-            button2.FontSize = 14;
+            FreePlayButton.Name = "FreePlay";
+            FreePlayButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            FreePlayButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            FreePlayButton.Height = 30;
+            FreePlayButton.Width = 90;
+            FreePlayButton.Content = "Free Play!";
+            FreePlayButton.FontSize = 14;
+            FreePlayButton.Click += FreePlay;
 
-            Canvas.SetLeft(button1, 0.0);
-            Canvas.SetLeft(button1, 0.0);
-            Canvas.SetTop(button2, 0.0);
-            Canvas.SetTop(button2, 0.0);
+            Canvas.SetLeft(LoginButton, 0.0);
+            Canvas.SetLeft(LoginButton, 0.0);
+            Canvas.SetTop(FreePlayButton, 0.0);
+            Canvas.SetTop(FreePlayButton, 0.0);
 
-            button1.Margin = new Thickness(1266, 395, 0, 0);
-            button1.Visibility = System.Windows.Visibility.Visible;
-            button2.Margin = new Thickness(620, 395, 0, 0);
-            button2.Visibility = System.Windows.Visibility.Visible;
+            LoginButton.Margin = new Thickness(1266, 395, 0, 0);
+            LoginButton.Visibility = System.Windows.Visibility.Visible;
+            FreePlayButton.Margin = new Thickness(620, 395, 0, 0);
+            FreePlayButton.Visibility = System.Windows.Visibility.Visible;
 
-            C.Children.Add(button1);
-            C.Children.Add(button2);
+            C.Children.Add(LoginButton);
+            C.Children.Add(FreePlayButton);
         }
 
         private void InitializeEllipse()
@@ -662,11 +671,11 @@ namespace SoundBored
         {
             int Random = (new Random()).Next(26);
 
-            ////JUST A TEMPORARY TESTING LINE OF CODE... CAN'T SEE THESE FOUR KEYS ON MY SCREEN. ;)
-            //while (Random > 9 && Random < 13 || Random > 22 && Random < 26)//TESTING
-            //{//TESTING
-            //    Random = (new Random()).Next(26);//TESTING
-            //}//TESTING
+            //JUST A TEMPORARY TESTING LINE OF CODE... CAN'T SEE THESE FOUR KEYS ON MY SCREEN. ;)
+            while (Random > 9 && Random < 13 || Random > 22 && Random < 26)//TESTING
+            {//TESTING
+                Random = (new Random()).Next(26);//TESTING
+            }//TESTING
 
             return Buttons[Random];
         }
@@ -728,6 +737,41 @@ namespace SoundBored
             return NewPattern;
         }
 
+        private ArrayList ReadPatternFromFile(string FileName)
+        {
+            ArrayList ReadPattern = new ArrayList();
+            PatternUnit TempPatternUnit;
+
+            FileStream fs = new FileStream(FileName, FileMode.Open);
+            StreamReader sr = new StreamReader(fs);
+
+            string TempoString = sr.ReadLine();
+            Tempo = Int32.Parse(TempoString);
+
+            string line = "";
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] Pieces = line.Split(':');
+                int note = int.Parse(Pieces[0]);
+                int duration = int.Parse(Pieces[1]);
+                TempPatternUnit = new PatternUnit(note, duration);
+                ReadPattern.Add(TempPatternUnit);
+            }
+
+            sr.Close();
+            fs.Close();
+
+            Quarter = 1 / (Tempo / 60);
+            Half = 2 * Quarter;
+            Whole = 2 * Half;
+
+            Eighth = Quarter / 2;
+            Sixteenth = Eighth / 2;
+            ThirtySecondth = Sixteenth / 2;
+
+            return ReadPattern;    
+        }
+
         private void StartTest()
         {
             //TODO What happens when you click Start Test
@@ -741,6 +785,11 @@ namespace SoundBored
             AppTimer.Elapsed += HandleTimerElapsedEvent;
             AppTimer.Start();
             AppTimer.Interval = TimerIncrement;
+        }
+
+        private void Login_Clicked(object sender, RoutedEventArgs e)
+        {
+            InitializeKeyInterface(true, false);
         }
 
         private void StopTest()
@@ -764,11 +813,10 @@ namespace SoundBored
 
         }
 
-        private void FreePlay()
+        private void FreePlay(object sender, RoutedEventArgs e)
         {
             //TODO What happens when you click Free Play
-
-
+            InitializeKeyInterface(true, true);
         }
 
         private void ShowTestResults()
