@@ -40,7 +40,7 @@ namespace SoundBored
         private DateTime LastPlayedTime;
         private bool MadeErrorOnLastNote;
         private int NoOfErrorsOnLastNote;
-        private double LatenessThreshold;
+        private TimeSpan LatenessThreshold;
 
         private static int NoOfKeys = 34;
         private HashSet<int> UnusedKeys;
@@ -74,6 +74,7 @@ namespace SoundBored
         private static int CurrentNote;
         private static int CurrentDuration;
         private static int CurrentNoteIndex;
+        private static int KeyMidiNote = 60;
 
         private static Boolean FreePlayMode = true;
         private static Boolean BigKeys = false;
@@ -766,7 +767,8 @@ namespace SoundBored
             while ((line = sr.ReadLine()) != null)
             {
                 string[] Pieces = line.Split(':');
-                int note = int.Parse(Pieces[0]);
+                int note = int.Parse(Pieces[0]); //MIDI Note Number
+                note -= KeyMidiNote;
                 int duration = int.Parse(Pieces[1]);
                 TempPatternUnit = new PatternUnit(note, duration);
                 ReadPattern.Add(TempPatternUnit);
@@ -796,7 +798,7 @@ namespace SoundBored
             CurrentDuration = 0;
             CurrentNoteIndex = -1;
 
-            LatenessThreshold = Quarter;
+            LatenessThreshold = new TimeSpan((long)(Half * 10000));
 
             AppTimer.Elapsed += HandleTimerElapsedEvent;
             AppTimer.Start();
@@ -855,13 +857,12 @@ namespace SoundBored
 
             if (CurrentDuration == 0)
             {
-                if (CurrentNoteIndex > -1)
-                { 
-                    
-                }
-
                 if (CurrentNoteIndex == Pattern.Count - 1)
                 {
+                    ((PatternUnit)Pattern[CurrentNoteIndex]).MadeErrors = MadeErrorOnLastNote;
+                    ((PatternUnit)Pattern[CurrentNoteIndex]).NoOfErrors = NoOfErrorsOnLastNote;
+                    ((PatternUnit)Pattern[CurrentNoteIndex]).IsLate = (((PatternUnit)Pattern[CurrentNoteIndex - 1]).ActualTime - ((PatternUnit)Pattern[CurrentNoteIndex - 1]).CorrectTime) > LatenessThreshold;
+
                     AppTimer.Enabled = false;
                     HideVisualCue();
                     ShowTestResults();
@@ -873,8 +874,13 @@ namespace SoundBored
                 CurrentNoteIndex++;
 
                 ((PatternUnit)Pattern[CurrentNoteIndex]).CorrectTime = DateTime.Now;
-                ((PatternUnit)Pattern[CurrentNoteIndex]).MadeErrors = MadeErrorOnLastNote;
-                ((PatternUnit)Pattern[CurrentNoteIndex]).NoOfErrors = NoOfErrorsOnLastNote;
+
+                if (CurrentNoteIndex > 0)
+                {
+                    ((PatternUnit)Pattern[CurrentNoteIndex - 1]).MadeErrors = MadeErrorOnLastNote;
+                    ((PatternUnit)Pattern[CurrentNoteIndex - 1]).NoOfErrors = NoOfErrorsOnLastNote;
+                    ((PatternUnit)Pattern[CurrentNoteIndex - 1]).IsLate = (((PatternUnit)Pattern[CurrentNoteIndex - 1]).ActualTime - ((PatternUnit)Pattern[CurrentNoteIndex - 1]).CorrectTime) > LatenessThreshold;
+                }
 
                 MadeErrorOnLastNote = false;
                 NoOfErrorsOnLastNote = 0;
