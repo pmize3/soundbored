@@ -37,11 +37,15 @@ namespace SoundBored
         private static int CuedButtonNo;
         private static bool IsPlayed;
 
-        private static int NoOfKeys = 26;
+        private static int NoOfKeys = 34;
         private HashSet<int> UnusedKeys;
-        private Rectangle[] Buttons = new Rectangle[26];
+        private Rectangle[] Buttons = new Rectangle[NoOfKeys];
         private Ellipse E = new Ellipse();
 
+        private Label label1, label2, label3 = new Label();
+        private Button button1, button2 = new Button();
+        private TextBox username, password = new TextBox();
+        
         private Timer AppTimer;
 
         private static int Tempo = 120;
@@ -54,10 +58,16 @@ namespace SoundBored
         private static double Half = 1000;
         private static double Whole = 2000;
 
+        private static int LeftMargin = 60;
+        private static int TopMargin = 120;
+
         private static PatternUnit CurrentPatternUnit;
         private static int CurrentNote;
         private static int CurrentDuration;
         private static int CurrentNoteIndex;
+
+        private static Boolean FreePlayMode = true;
+        private static Boolean BigKeys = false;
 
         //ArrayList Pattern has elements of type PatternUnit converted to Object, so don't forget data conversions when adding or removing elements from Pattern
         private ArrayList Pattern = new ArrayList();
@@ -144,18 +154,153 @@ namespace SoundBored
         //Called as soon as Canvas C is loaded... Init screen...
         private void C_Loaded(object sender, RoutedEventArgs e)
         {
-
-            for (int i = 0; i < 26; i++)
+            //Boolean[] initVal = StartSplashScreen();
+            
+            int tmp;
+            int numKeys;
+            //BigKeys = initVal[0];
+            //FreePlayMode = initVal[1];
+            if (BigKeys)
+                numKeys = 26; // or 24?
+            else
+                numKeys = NoOfKeys;
+            for (int i = 0; i < numKeys; i++)
             {
                 Buttons[i] = new Rectangle();
-                InitializeRectangle(i);
+                tmp = i % (numKeys/2);
+                if (tmp == 1 || tmp == 3 || tmp == 6 || tmp == 8 || tmp == 10 || tmp == 13 || tmp == 15 || tmp == 18 || tmp == 20 || tmp == 22)
+                    InitializeBlackKey(i);
+                else
+                    InitializeWhiteKey(i);
+                //InitializeRectangle(i);
             }
 
             InitializeEllipse();
 
-            TransformToThirteenKeys();
+            if (BigKeys)
+                TransformToThirteenKeys();
+            else
+                TransformToNKeys(NoOfKeys);
 
-            StartTest();
+            if(!FreePlayMode)
+                StartTest();
+        }
+
+        private Boolean[] StartSplashScreen()
+        {
+            InitializeLabel();
+            InitializeText();
+            InitializeButton();
+            Boolean[] retVal = new Boolean[2];
+            retVal[0] = true;
+            retVal[1] = true;
+            return retVal;
+        }
+
+        private void InitializeLabel()
+        {
+            label1.Name = "username";
+            label1.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            label1.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            label1.Content = "Username";
+            label1.Height = 40;
+            label1.Width = 96;
+            label1.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+
+            label2.Name = "password";
+            label2.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            label2.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            label2.Content = "Password";
+            label2.Height = 40;
+            label2.Width = 96;
+            label2.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+
+            label3.Name = "Title";
+            label3.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            label3.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            label3.Content = "Sound Bored";
+            label3.Height = 124;
+            label3.Width = 252;
+            label3.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0xFF, 0xFF));
+            label3.FontSize = 40;
+
+            Canvas.SetLeft(label1, 0.0);
+            Canvas.SetLeft(label2, 0.0);
+            Canvas.SetLeft(label3, 0.0);
+            Canvas.SetTop(label1, 0.0);
+            Canvas.SetTop(label2, 0.0);
+            Canvas.SetTop(label3, 0.0);
+
+            label1.Margin = new Thickness(1104, 289, 0, 0);
+            label1.Visibility = System.Windows.Visibility.Visible;
+            label2.Margin = new Thickness(1104, 338, 0, 0);
+            label2.Visibility = System.Windows.Visibility.Visible;
+            label3.Margin = new Thickness(540, 258, 0, 0);
+            label3.Visibility = System.Windows.Visibility.Visible;
+
+            C.Children.Add(label1);
+            C.Children.Add(label2);
+            C.Children.Add(label3);
+        }
+
+        private void InitializeText()
+        {
+            username.Name = "username";
+            username.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            username.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            username.Height = 23;
+            username.Width = 120;
+
+            password.Name = "password";
+            password.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            password.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            password.Height = 23;
+            password.Width = 120;
+
+            Canvas.SetLeft(username, 0.0);
+            Canvas.SetLeft(password, 0.0);
+            Canvas.SetTop(username, 0.0);
+            Canvas.SetTop(password, 0.0);
+
+            username.Margin = new Thickness(1233, 294, 0, 0);
+            username.Visibility = System.Windows.Visibility.Visible;
+            password.Margin = new Thickness(1233, 343, 0, 0);
+            password.Visibility = System.Windows.Visibility.Visible;
+
+            C.Children.Add(username);
+            C.Children.Add(password);
+        }
+
+        private void InitializeButton()
+        {
+            button1.Name = "Login";
+            button1.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            button1.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            button1.Height = 30;
+            button1.Width = 90;
+            button1.Content = "Login";
+            button1.FontSize = 14;
+
+            button2.Name = "FreePlay";
+            button2.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            button2.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            button2.Height = 30;
+            button2.Width = 90;
+            button2.Content = "Free Play!";
+            button2.FontSize = 14;
+
+            Canvas.SetLeft(button1, 0.0);
+            Canvas.SetLeft(button1, 0.0);
+            Canvas.SetTop(button2, 0.0);
+            Canvas.SetTop(button2, 0.0);
+
+            button1.Margin = new Thickness(1266, 395, 0, 0);
+            button1.Visibility = System.Windows.Visibility.Visible;
+            button2.Margin = new Thickness(620, 395, 0, 0);
+            button2.Visibility = System.Windows.Visibility.Visible;
+
+            C.Children.Add(button1);
+            C.Children.Add(button2);
         }
 
         private void InitializeEllipse()
@@ -182,6 +327,64 @@ namespace SoundBored
             Buttons[i].TouchDown += B_TouchDown;
         }
 
+        private void InitializeWhiteKey(int i)
+        {
+            Buttons[i].Name = "B" + i;
+            Buttons[i].HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            Buttons[i].VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            Buttons[i].Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x00, 0x00));
+            Canvas.SetLeft(Buttons[i], 0.0);
+            Canvas.SetTop(Buttons[i], 0.0);
+            Buttons[i].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+            Buttons[i].TouchDown += B_TouchDown;
+        }
+
+        private void InitializeBlackKey(int i)
+        {
+            Buttons[i].Name = "B" + i;
+            Buttons[i].HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            Buttons[i].VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            Buttons[i].Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+            Canvas.SetLeft(Buttons[i], 0.0);
+            Canvas.SetTop(Buttons[i], 0.0);
+            Buttons[i].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x00, 0x00));
+            Buttons[i].TouchDown += B_TouchDown;
+        }
+
+        //TODO: FIX THIS
+        private void TransformToNKeys(int n)
+        {
+            UnusedKeys = new HashSet<int>();
+
+            C.Children.Clear();
+
+            int LeftAmount = LeftMargin;
+            int TopAmount = 600;
+            int LeftIncrement = 100;
+            int RectWidth = 100;
+            int RectHeight = 360;
+
+            for (int i = 0; i < NoOfKeys; i++)
+            {
+                if (i == n/2)
+                {
+                    LeftAmount = LeftMargin;
+                    TopAmount = TopMargin;
+                }
+
+                Buttons[i].Width = RectWidth;
+                Buttons[i].Height = RectHeight;
+                Buttons[i].Margin = new Thickness(LeftAmount, TopAmount, 0, 0);
+                Buttons[i].Visibility = System.Windows.Visibility.Visible;
+
+                C.Children.Add(Buttons[i]);
+
+                LeftAmount += LeftIncrement;
+            }
+
+            C.Children.Add(E);
+        }
+        
         //Changes layout to 26 keys 0 - 25
         private void TransformToThirteenKeys()
         {
@@ -195,7 +398,7 @@ namespace SoundBored
             int RectWidth = 110;
             int RectHeight = 360;
 
-            for (int i = 0; i < NoOfKeys; i++)
+            for (int i = 0; i < 26; i++)
             {
                 if (i == 13)
                 {
@@ -350,6 +553,14 @@ namespace SoundBored
         {
             bool isCued = false;
             OscMessage m;
+
+            if (FreePlayMode)
+            {
+                m = new OscMessage(src, "/soundBored/playNote");
+                m.Append<int>(idx);
+                m.Send(dst);
+                return true;
+            }
 
             if (CuedButtonNo != EIdx)
             {

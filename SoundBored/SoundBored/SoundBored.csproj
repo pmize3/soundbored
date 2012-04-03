@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AmCharts.Windows.QuickCharts">
+      <HintPath>lib\amwpfquick_1.1\AmCharts.Windows.QuickCharts.dll</HintPath>
+    </Reference>
     <Reference Include="Bespoke.Common">
       <HintPath>lib\Bespoke.Common.dll</HintPath>
     </Reference>

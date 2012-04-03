@@ -5,7 +5,7 @@
     Title="SoundBored" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="1080" d:DesignWidth="1940" SizeToContent="WidthAndHeight">
   <Grid>
       <Frame Name="F" Height="1080" Width="1920" HorizontalAlignment="Left" VerticalAlignment="Top" />
-        <Canvas Background="Red" Name="C" HorizontalAlignment="Left" Width="1920" VerticalAlignment="Top" Height="1080" Loaded="C_Loaded">
+        <Canvas Background="Black" Name="C" HorizontalAlignment="Left" Width="1920" VerticalAlignment="Top" Height="1080" Loaded="C_Loaded">
         </Canvas>
     </Grid>
 </s:SurfaceWindow>
