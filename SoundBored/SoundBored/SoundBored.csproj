@@ -105,6 +105,12 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="lib\amwpfquick_1.1\AmCharts.Windows.QuickCharts.dll" />
+    <Resource Include="lib\amwpfquick_1.1\changelog.txt" />
+    <Content Include="lib\amwpfquick_1.1\Design\AmCharts.Windows.QuickCharts.Design.dll" />
+    <Content Include="lib\amwpfquick_1.1\Design\AmCharts.Windows.QuickCharts.VisualStudio.Design.dll" />
+    <Resource Include="lib\amwpfquick_1.1\license.txt" />
+    <Resource Include="lib\amwpfquick_1.1\readme.txt" />
     <Content Include="lib\Bespoke.Common.dll" />
     <Content Include="lib\Bespoke.Common.Osc.dll" />
     <Content Include="Resources\icon.png">
