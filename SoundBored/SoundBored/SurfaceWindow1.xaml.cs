@@ -176,9 +176,12 @@ namespace SoundBored
             BigKeys = Bigkeys;
 
             if (BigKeys)
-                numKeys = 26;
-            else
-                numKeys = NoOfKeys;
+            {
+                NoOfKeys = 26;
+            }
+            
+            numKeys = NoOfKeys;
+
             for (int i = 0; i < numKeys; i++)
             {
                 Buttons[i] = new Rectangle();
@@ -763,12 +766,25 @@ namespace SoundBored
             string TempoString = sr.ReadLine();
             Tempo = Int32.Parse(TempoString);
 
+            string KeyMidiNoteString = sr.ReadLine();
+            KeyMidiNote = Int32.Parse(KeyMidiNoteString);
+
             string line = "";
             while ((line = sr.ReadLine()) != null)
             {
                 string[] Pieces = line.Split(':');
                 int note = int.Parse(Pieces[0]); //MIDI Note Number
                 note -= KeyMidiNote;
+
+                if (note < 0)
+                {
+                    note = -1;
+                }
+                else if (note > NoOfKeys)
+                {
+                    note = NoOfKeys - 1;
+                }
+
                 int duration = int.Parse(Pieces[1]);
                 TempPatternUnit = new PatternUnit(note, duration);
                 ReadPattern.Add(TempPatternUnit);
@@ -794,7 +810,8 @@ namespace SoundBored
             TimerIncrement = ThirtySecondth;
             AppTimer = new Timer(TimerIncrement);
 
-            Pattern = GenerateRandomPattern(6, 5);
+            //Pattern = GenerateRandomPattern(6, 5);
+            Pattern = ReadPatternFromFile("../../patterns/" + "RandomPattern.pat");
             CurrentDuration = 0;
             CurrentNoteIndex = -1;
 
