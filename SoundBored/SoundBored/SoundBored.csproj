@@ -113,6 +113,7 @@
     <Resource Include="lib\amwpfquick_1.1\readme.txt" />
     <Content Include="lib\Bespoke.Common.dll" />
     <Content Include="lib\Bespoke.Common.Osc.dll" />
+    <None Include="patterns\RandomPattern.pat" />
     <Content Include="Resources\icon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
