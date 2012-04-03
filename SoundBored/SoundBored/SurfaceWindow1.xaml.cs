@@ -46,8 +46,8 @@ namespace SoundBored
         private Label UserNameLabel = new Label();
         private Label PasswordLabel = new Label();
         private Label TitleLabel = new Label();
-        private Button LoginButton = new Button();
-        private Button FreePlayButton = new Button();
+        private SurfaceButton LoginButton = new SurfaceButton();
+        private SurfaceButton FreePlayButton = new SurfaceButton();
         private TextBox username = new TextBox();
         private TextBox password = new TextBox();
         
@@ -317,10 +317,10 @@ namespace SoundBored
             E.Name = "E";
             E.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             E.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            E.Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0xFF, 0xFA, 0xFC));
+            E.Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0x00, 0xFF, 0xFF));
             Canvas.SetLeft(E, 0.0);
             Canvas.SetTop(E, 0.0);
-            E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0xFF, 0xFA, 0xFC));
+            E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0x00, 0xFF, 0xFF));
             E.TouchDown += E_TouchDown;
         }
 
@@ -533,7 +533,8 @@ namespace SoundBored
                         E.Width = R.Width;
                         E.Visibility = System.Windows.Visibility.Visible;
                         E.Margin = new Thickness(R.Margin.Left, R.Margin.Top, 0, 0);
-                        E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0xFF, 0xFA, 0xFC));
+                        E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0x00, 0xFF, 0xFF));
+                        E.Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0x00, 0xFF, 0xFF));
                     }
                 ));
         }
@@ -778,7 +779,7 @@ namespace SoundBored
             TimerIncrement = ThirtySecondth;
             AppTimer = new Timer(TimerIncrement);
 
-            Pattern = GenerateRandomPattern(4, 50);
+            Pattern = GenerateRandomPattern(6, 5);
             CurrentDuration = 0;
             CurrentNoteIndex = -1;
 
@@ -822,7 +823,15 @@ namespace SoundBored
         private void ShowTestResults()
         { 
             //TODO Display Results of the Test
-
+            //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            ChartCanvas.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                new Action(
+                    delegate()
+                    {
+                        ChartCanvas.Visibility = System.Windows.Visibility.Visible;
+                    }
+                ));
         }
 
         private void HandleTimerElapsedEvent(Object Source, ElapsedEventArgs e)

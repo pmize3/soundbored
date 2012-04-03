@@ -8,16 +8,18 @@
         <Canvas Background="Black" Name="C" HorizontalAlignment="Left" Width="1920" VerticalAlignment="Top" Height="1080" Loaded="C_Loaded">
         </Canvas>
         <Canvas Background="Black" Name="ChartCanvas" HorizontalAlignment="Left" Width="1920" VerticalAlignment="Top" Height="1080" Visibility="Collapsed">
-            <amq:SerialChart Canvas.Left="0" Canvas.Top="0" Height="200" Name="HistoryChart" Width="300">
+            <amq:SerialChart Canvas.Left="528" Canvas.Top="198" Height="200" Name="HistoryChart" Width="300">
                 <amq:SerialChart.Graphs>
                     <amq:LineGraph Title="Accuracy History" Background="Black" BorderBrush="Cyan" Brush="Cyan" />
                 </amq:SerialChart.Graphs>
             </amq:SerialChart>
-            <amq:SerialChart Canvas.Left="0" Canvas.Top="0" Height="200" Name="GapPerformance" Width="300">
+            <amq:SerialChart Canvas.Left="1065" Canvas.Top="668" Height="200" Name="GapPerformance" Width="300">
                 <amq:SerialChart.Graphs>
                     <amq:ColumnGraph Background="Black" BorderBrush="Cyan" Brush="Cyan" Title="Gap Performance" />
                 </amq:SerialChart.Graphs>
             </amq:SerialChart>
+            <Label Canvas.Left="780" Canvas.Top="85" Content="Results" Height="78" Name="ResultLabel" Width="315" Foreground="#CC00FFFF" FontSize="56" />
+            <Label Canvas.Left="680" Canvas.Top="430" Content="Congratulations! You scored 97% accuracy" Height="190" Name="Score" Width="415" Foreground="Cyan" FontSize="36" />
         </Canvas>
     </Grid>
 </s:SurfaceWindow>
