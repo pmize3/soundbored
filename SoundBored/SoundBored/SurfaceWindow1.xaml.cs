@@ -37,6 +37,10 @@ namespace SoundBored
         private static int EIdx;
         private static int CuedButtonNo;
         private static bool IsPlayed;
+        private DateTime LastPlayedTime;
+        private bool MadeErrorOnLastNote;
+        private int NoOfErrorsOnLastNote;
+        private double LatenessThreshold;
 
         private static int NoOfKeys = 34;
         private HashSet<int> UnusedKeys;
@@ -584,6 +588,7 @@ namespace SoundBored
 
             if (CuedButtonNo == idx)
             {
+                LastPlayedTime = DateTime.Now;
                 m = new OscMessage(src, "/soundBored/playNote");
                 isCued = true;
                 Console.WriteLine("playNote " + idx);
@@ -605,6 +610,9 @@ namespace SoundBored
             else
             {
                 m = new OscMessage(src, "/soundBored/errorNote");
+
+                MadeErrorOnLastNote = true;
+                NoOfErrorsOnLastNote++;
 
                 Console.WriteLine("errorNote " + idx);
             }
@@ -788,6 +796,8 @@ namespace SoundBored
             CurrentDuration = 0;
             CurrentNoteIndex = -1;
 
+            LatenessThreshold = Quarter;
+
             AppTimer.Elapsed += HandleTimerElapsedEvent;
             AppTimer.Start();
             AppTimer.Interval = TimerIncrement;
@@ -845,6 +855,11 @@ namespace SoundBored
 
             if (CurrentDuration == 0)
             {
+                if (CurrentNoteIndex > -1)
+                { 
+                    
+                }
+
                 if (CurrentNoteIndex == Pattern.Count - 1)
                 {
                     AppTimer.Enabled = false;
@@ -856,6 +871,14 @@ namespace SoundBored
                 }
 
                 CurrentNoteIndex++;
+
+                ((PatternUnit)Pattern[CurrentNoteIndex]).CorrectTime = DateTime.Now;
+                ((PatternUnit)Pattern[CurrentNoteIndex]).MadeErrors = MadeErrorOnLastNote;
+                ((PatternUnit)Pattern[CurrentNoteIndex]).NoOfErrors = NoOfErrorsOnLastNote;
+
+                MadeErrorOnLastNote = false;
+                NoOfErrorsOnLastNote = 0;
+
                 CurrentPatternUnit = new PatternUnit((PatternUnit)Pattern[CurrentNoteIndex]);
                 CurrentNote = CurrentPatternUnit.Note;
                 CurrentDuration = CurrentPatternUnit.Duration;
@@ -878,6 +901,7 @@ namespace SoundBored
             }
             else if (IsPlayed && EIdx >= 0)
             {
+                ((PatternUnit)Pattern[CurrentNoteIndex]).ActualTime = LastPlayedTime;
                 Console.WriteLine("IP == T & EIdx >=0 : CDur-- : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
                 CurrentDuration--;
             }
@@ -902,6 +926,11 @@ namespace SoundBored
     {
         private int note;
         private int duration;
+        private DateTime correcttime = new DateTime();
+        private DateTime actualtime = new DateTime();
+        private bool islate = false;
+        private bool madeerrors = false;
+        private int nooferrors;
 
         public int Note
         {
@@ -927,6 +956,76 @@ namespace SoundBored
             {
                 duration = value;
             }
+        }
+
+        public DateTime CorrectTime
+        {
+            get
+            {
+                return correcttime;
+            }
+
+            set
+            {
+                correcttime = value;
+            }
+        }
+
+        public DateTime ActualTime
+        {
+            get
+            {
+                return actualtime;
+            }
+
+            set
+            {
+                actualtime = value;
+            }
+        }
+
+        public bool IsLate
+        {
+            get
+            {
+                return islate;
+            }
+
+            set
+            {
+                islate = value;
+            }
+        }
+
+        public bool MadeErrors
+        {
+            get
+            {
+                return madeerrors;
+            }
+
+            set
+            {
+                madeerrors = value;
+            }
+        }
+
+        public int NoOfErrors
+        {
+            get
+            {
+                return nooferrors;
+            }
+
+            set
+            {
+                nooferrors = value;
+            }
+        }
+
+        public void IncrementErrorsMade()
+        {
+            nooferrors++;
         }
 
         public PatternUnit()
