@@ -1016,17 +1016,23 @@ namespace SoundBored
             StreamReader sr = new StreamReader(fs);
 
             string TempDifficulty;
-            string TempAccuracy;
             string TempDateTime;
+            string TempAccuracyTotal;
+            string TempAccuracyError;
+            string TempAccuracyLate;
 
             while((TempDateTime = sr.ReadLine()) != null)
             {
-                TempAccuracy = sr.ReadLine();
                 TempDifficulty = sr.ReadLine();
+                TempAccuracyTotal = sr.ReadLine();
+                TempAccuracyError = sr.ReadLine();
+                TempAccuracyLate = sr.ReadLine();
 
-                History.Add(new PatternMetric(DateTime.Parse(TempDateTime), int.Parse(TempDifficulty), double.Parse(TempAccuracy)));
+                History.Add(new PatternMetric(DateTime.Parse(TempDateTime), int.Parse(TempDifficulty), double.Parse(TempAccuracyTotal), double.Parse(TempAccuracyError), double.Parse(TempAccuracyLate)));
             }
 
+            sr.Close();
+            fs.Close();
             return History;
         }
 
@@ -1035,26 +1041,35 @@ namespace SoundBored
             Console.WriteLine("Write User History");
 
             FileStream fs = new FileStream(FileName, FileMode.Create);
-            StreamWriter sr = new StreamWriter(fs);
+            StreamWriter sw = new StreamWriter(fs);
 
             try
             {
                 foreach (PatternMetric Metric in PatternMetrics)
                 {
-                    sr.WriteLine(Metric.PatternTimePlayed.ToString());
+                    sw.WriteLine(Metric.PatternTimePlayed.ToString());
                     Console.WriteLine(Metric.PatternTimePlayed.ToString());
-                    sr.WriteLine(Metric.PatternDifficulty.ToString());
+                    sw.WriteLine(Metric.PatternDifficulty.ToString());
                     Console.WriteLine(Metric.PatternDifficulty.ToString());
-                    sr.WriteLine(Metric.PatternAccuracy.ToString());
-                    Console.WriteLine(Metric.PatternAccuracy.ToString());
+                    sw.WriteLine(Metric.PatternAccuracyTotal.ToString());
+                    Console.WriteLine(Metric.PatternAccuracyTotal.ToString());
+                    sw.WriteLine(Metric.PatternAccuracyError.ToString());
+                    Console.WriteLine(Metric.PatternAccuracyError.ToString());
+                    sw.WriteLine(Metric.PatternAccuracyLate.ToString());
+                    Console.WriteLine(Metric.PatternAccuracyLate.ToString());
                 }
             }
             catch(Exception e)
             {
                 Console.WriteLine("Write Error: " + e.Message);
+
+                sw.Close();
+                fs.Close();
                 return false;
             }
 
+            sw.Close();
+            fs.Close();
             return true;
         }
 
@@ -1139,7 +1154,7 @@ namespace SoundBored
             CurrentDuration = 0;
             CurrentNoteIndex = -1;
 
-            LatenessThreshold = new TimeSpan((long)(Half * 10000));
+            LatenessThreshold = new TimeSpan((long)(2 * Half * 10000));
 
             AppTimer.Elapsed += HandleTimerElapsedEvent;
             AppTimer.Start();
@@ -1159,7 +1174,7 @@ namespace SoundBored
 
             UserFileName = HashGenerate(UserName, Password) + ".user";
 
-            ReadHistoryFromFile(UserDataPath + UserFileName);
+            PatternMetrics = ReadHistoryFromFile(UserDataPath + UserFileName);
 
             //InitializeKeyInterface(true, false, "C");
             TransformMenu();
@@ -1293,6 +1308,9 @@ namespace SoundBored
 
                     AppTimer.Enabled = false;
                     HideVisualCue();
+
+                    CalculateAccuracy();
+
                     ShowTestResults();
 
                     Console.WriteLine("Test Done : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
@@ -1353,6 +1371,24 @@ namespace SoundBored
             {
                 Console.WriteLine("Else... ??? : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
             }
+        }
+
+        private void CalculateAccuracy()
+        {
+            double AccuracyTotal = 100;
+            double AccuracyErrorOnly = 100;
+            double AccuracyLateOnly = 100;
+
+            foreach (PatternUnit PUnit in Pattern)
+            {
+                AccuracyTotal -= ((PUnit.IsLate || PUnit.MadeErrors) ? 1.0 : 0.0) / (double)Pattern.Count * 100;
+                AccuracyErrorOnly -= ((PUnit.MadeErrors) ? 1.0 : 0.0) / (double)Pattern.Count * 100;
+                AccuracyLateOnly -= ((PUnit.IsLate) ? 1.0 : 0.0) / (double)Pattern.Count * 100;
+            }
+
+            ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyTotal = AccuracyTotal;
+            ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyError = AccuracyErrorOnly;
+            ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyLate = AccuracyLateOnly;
         }
     }
 
@@ -1484,7 +1520,9 @@ namespace SoundBored
     {
         private DateTime patterntimeplayed;
         private int patterndifficulty;
-        private double patternaccuracy;
+        private double patternaccuracytotal;
+        private double patternaccuracyerror;
+        private double patternaccuracylate;
 
         public DateTime PatternTimePlayed
         {
@@ -1510,15 +1548,39 @@ namespace SoundBored
             }
         }
 
-        public double PatternAccuracy
+        public double PatternAccuracyTotal
         {
             get
             {
-                return patternaccuracy;
+                return patternaccuracytotal;
             }
             set
             {
-                patternaccuracy = value;
+                patternaccuracytotal = value;
+            }
+        }
+
+        public double PatternAccuracyError
+        {
+            get
+            {
+                return patternaccuracyerror;
+            }
+            set
+            {
+                patternaccuracyerror = value;
+            }
+        }
+
+        public double PatternAccuracyLate
+        {
+            get
+            {
+                return patternaccuracylate;
+            }
+            set
+            {
+                patternaccuracylate = value;
             }
         }
 
@@ -1527,11 +1589,13 @@ namespace SoundBored
             
         }
 
-        public PatternMetric(DateTime TimePlayed, int Difficulty, double Accuracy)
+        public PatternMetric(DateTime TimePlayed, int Difficulty, double AccuracyTotal, double AccuracyError, double AccuracyLate)
         {
             this.PatternTimePlayed = TimePlayed;
             PatternDifficulty = Difficulty;
-            PatternAccuracy = Accuracy;
+            PatternAccuracyTotal = AccuracyTotal;
+            PatternAccuracyError = AccuracyError;
+            PatternAccuracyLate = AccuracyLate;
         }
     }
 }
