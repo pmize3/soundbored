@@ -54,6 +54,10 @@ namespace SoundBored
         private SurfaceButton FreePlayButton = new SurfaceButton();
         private SurfaceTextBox username = new SurfaceTextBox();
         private SurfaceTextBox password = new SurfaceTextBox();
+
+        private string UserName;
+        private string Password;
+        private string UserFileName;
         
         private Timer AppTimer;
 
@@ -83,6 +87,7 @@ namespace SoundBored
 
         //ArrayList Pattern has elements of type PatternUnit converted to Object, so don't forget data conversions when adding or removing elements from Pattern
         private ArrayList Pattern = new ArrayList();
+        private ArrayList PatternMetrics = new ArrayList();
 
         /// <summary>
         /// Default constructor.
@@ -801,6 +806,51 @@ namespace SoundBored
             return NewPattern;
         }
 
+        private ArrayList ReadHistoryFromFile(string FileName)
+        {
+            ArrayList History = new ArrayList();
+
+            FileStream fs = new FileStream(FileName, FileMode.Open);
+            StreamReader sr = new StreamReader(fs);
+
+            string TempDifficulty;
+            string TempAccuracy;
+            string TempDateTime;
+
+            while((TempDateTime = sr.ReadLine()) != null)
+            {
+                TempAccuracy = sr.ReadLine();
+                TempDifficulty = sr.ReadLine();
+
+                History.Add(new PatternMetric(DateTime.Parse(TempDateTime), int.Parse(TempDifficulty), double.Parse(TempAccuracy)));
+            }
+
+            return History;
+        }
+
+        private bool WriteHistoryToFile(string FileName)
+        {
+            FileStream fs = new FileStream(FileName, FileMode.Create);
+            StreamWriter sr = new StreamWriter(fs);
+
+            try
+            {
+                foreach (PatternMetric Metric in PatternMetrics)
+                {
+                    sr.WriteLine(Metric.PatternTimePlayed);
+                    sr.WriteLine(Metric.PatternDifficulty);
+                    sr.WriteLine(Metric.PatternAccuracy);
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Write Error: " + e.Message);
+                return false;
+            }
+
+            return true;
+        }
+
         private ArrayList ReadPatternFromFile(string FileName)
         {
             ArrayList ReadPattern = new ArrayList();
@@ -809,15 +859,36 @@ namespace SoundBored
             FileStream fs = new FileStream(FileName, FileMode.Open);
             StreamReader sr = new StreamReader(fs);
 
-            string TempoString = sr.ReadLine();
-            Tempo = Int32.Parse(TempoString);
+            string TempString;
 
-            string KeyMidiNoteString = sr.ReadLine();
-            KeyMidiNote = Int32.Parse(KeyMidiNoteString);
+            while((TempString = sr.ReadLine()).IndexOf("//") != -1)
+            {   
+            }
+            
+            Tempo = Int32.Parse(TempString);
+
+            while ((TempString = sr.ReadLine()).IndexOf("//") != -1)
+            {
+            }
+
+            KeyMidiNote = Int32.Parse(TempString);
+
+            while ((TempString = sr.ReadLine()).IndexOf("//") != -1)
+            {
+            }
+
+            PatternMetrics.Add(new PatternMetric());
+            ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternDifficulty = Int32.Parse(TempString);
+            ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternTimePlayed = DateTime.Now;
 
             string line = "";
             while ((line = sr.ReadLine()) != null)
             {
+                if (line.IndexOf("//") != -1)
+                {
+                    continue;
+                }
+
                 string[] Pieces = line.Split(':');
                 int note = int.Parse(Pieces[0]); //MIDI Note Number
                 note -= KeyMidiNote;
@@ -916,7 +987,7 @@ namespace SoundBored
 
         private void HandleTimerElapsedEvent(Object Source, ElapsedEventArgs e)
         { 
-            //TODO What happens when AppTimer's Elapsed Event Fire
+            //What happens when AppTimer's Elapsed Event Fire
 
             if (CurrentDuration == 0)
             {
@@ -1112,6 +1183,61 @@ namespace SoundBored
         {
             this.Note = PattrnUnit.Note;
             this.Duration = PattrnUnit.Duration;
+        }
+    }
+
+    class PatternMetric
+    {
+        private DateTime patterntimeplayed;
+        private int patterndifficulty;
+        private double patternaccuracy;
+
+        public DateTime PatternTimePlayed
+        {
+            get
+            {
+                return patterntimeplayed;
+            }
+            set
+            {
+                patterntimeplayed = value;
+            }
+        }
+
+        public int PatternDifficulty
+        {
+            get
+            {
+                return patterndifficulty;
+            }
+            set
+            {
+                patterndifficulty = value;
+            }
+        }
+
+        public double PatternAccuracy
+        {
+            get
+            {
+                return patternaccuracy;
+            }
+            set
+            {
+                patternaccuracy = value;
+            }
+        }
+
+        public PatternMetric()
+        { 
+            
+        }
+
+        public PatternMetric(DateTime TimePlayed, int Difficulty, double Accuracy)
+        {
+            this.PatternTimePlayed = TimePlayed;
+            PatternDifficulty = Difficulty;
+            PatternAccuracy = Accuracy;
         }
     }
 }
