@@ -52,12 +52,14 @@ namespace SoundBored
         private Label TitleLabel = new Label();
         private SurfaceButton LoginButton = new SurfaceButton();
         private SurfaceButton FreePlayButton = new SurfaceButton();
-        private SurfaceTextBox username = new SurfaceTextBox();
-        private SurfaceTextBox password = new SurfaceTextBox();
+        private SurfaceTextBox UserNameTextBox = new SurfaceTextBox();
+        private SurfaceTextBox PasswordTextBox = new SurfaceTextBox();
 
         private string UserName;
         private string Password;
         private string UserFileName;
+        private const string PatternPath = "../../patterns/";
+        private const string UserDataPath = "../../userdata/";
         
         private Timer AppTimer;
 
@@ -272,30 +274,30 @@ namespace SoundBored
 
         private void InitializeText()
         {
-            username.Name = "username";
-            username.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            username.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            username.Height = 23;
-            username.Width = 120;
+            UserNameTextBox.Name = "username";
+            UserNameTextBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            UserNameTextBox.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            UserNameTextBox.Height = 23;
+            UserNameTextBox.Width = 120;
 
-            password.Name = "password";
-            password.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            password.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            password.Height = 23;
-            password.Width = 120;
+            PasswordTextBox.Name = "password";
+            PasswordTextBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            PasswordTextBox.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            PasswordTextBox.Height = 23;
+            PasswordTextBox.Width = 120;
 
-            Canvas.SetLeft(username, 0.0);
-            Canvas.SetLeft(password, 0.0);
-            Canvas.SetTop(username, 0.0);
-            Canvas.SetTop(password, 0.0);
+            Canvas.SetLeft(UserNameTextBox, 0.0);
+            Canvas.SetLeft(PasswordTextBox, 0.0);
+            Canvas.SetTop(UserNameTextBox, 0.0);
+            Canvas.SetTop(PasswordTextBox, 0.0);
 
-            username.Margin = new Thickness(1233, 294, 0, 0);
-            username.Visibility = System.Windows.Visibility.Visible;
-            password.Margin = new Thickness(1233, 343, 0, 0);
-            password.Visibility = System.Windows.Visibility.Visible;
+            UserNameTextBox.Margin = new Thickness(1233, 294, 0, 0);
+            UserNameTextBox.Visibility = System.Windows.Visibility.Visible;
+            PasswordTextBox.Margin = new Thickness(1233, 343, 0, 0);
+            PasswordTextBox.Visibility = System.Windows.Visibility.Visible;
 
-            C.Children.Add(username);
-            C.Children.Add(password);
+            C.Children.Add(UserNameTextBox);
+            C.Children.Add(PasswordTextBox);
         }
 
         private void InitializeButton()
@@ -810,7 +812,7 @@ namespace SoundBored
         {
             ArrayList History = new ArrayList();
 
-            FileStream fs = new FileStream(FileName, FileMode.Open);
+            FileStream fs = new FileStream(FileName, FileMode.OpenOrCreate);
             StreamReader sr = new StreamReader(fs);
 
             string TempDifficulty;
@@ -830,6 +832,8 @@ namespace SoundBored
 
         private bool WriteHistoryToFile(string FileName)
         {
+            Console.WriteLine("Write User History");
+
             FileStream fs = new FileStream(FileName, FileMode.Create);
             StreamWriter sr = new StreamWriter(fs);
 
@@ -837,9 +841,12 @@ namespace SoundBored
             {
                 foreach (PatternMetric Metric in PatternMetrics)
                 {
-                    sr.WriteLine(Metric.PatternTimePlayed);
-                    sr.WriteLine(Metric.PatternDifficulty);
-                    sr.WriteLine(Metric.PatternAccuracy);
+                    sr.WriteLine(Metric.PatternTimePlayed.ToString());
+                    Console.WriteLine(Metric.PatternTimePlayed.ToString());
+                    sr.WriteLine(Metric.PatternDifficulty.ToString());
+                    Console.WriteLine(Metric.PatternDifficulty.ToString());
+                    sr.WriteLine(Metric.PatternAccuracy.ToString());
+                    Console.WriteLine(Metric.PatternAccuracy.ToString());
                 }
             }
             catch(Exception e)
@@ -928,7 +935,7 @@ namespace SoundBored
             AppTimer = new Timer(TimerIncrement);
 
             //Pattern = GenerateRandomPattern(6, 5);
-            Pattern = ReadPatternFromFile("../../patterns/" + "RandomPattern.pat");
+            Pattern = ReadPatternFromFile(PatternPath + "RandomPattern.pat");
             CurrentDuration = 0;
             CurrentNoteIndex = -1;
 
@@ -941,7 +948,52 @@ namespace SoundBored
 
         private void Login_Clicked(object sender, RoutedEventArgs e)
         {
+            UserName = UserNameTextBox.Text;
+            Password = PasswordTextBox.Text;
+
+            if (UserName.Length == 0 || Password.Length == 0)
+            {
+                Console.WriteLine("Username or Password was empty");
+                return;
+            }
+
+            UserFileName = HashGenerate(UserName, Password) + ".user";
+
+            ReadHistoryFromFile(UserDataPath + UserFileName);
+
             InitializeKeyInterface(true, false, "C");
+        }
+
+        private string HashGenerate(string UserName, string Password)
+        {
+            string GeneratedHash = "";
+            byte[] unamebytes;
+            byte[] pwordbytes;
+
+            while (UserName.Length < 25)
+            {
+                UserName += UserName;
+            }
+
+            UserName = UserName.Substring(0, 25);
+
+            unamebytes = Encoding.ASCII.GetBytes(UserName.ToCharArray());
+
+            while (Password.Length < 25)
+            {
+                Password += Password;
+            }
+
+            Password = Password.Substring(0, 25);
+
+            pwordbytes = Encoding.ASCII.GetBytes(Password.ToCharArray());
+
+            for (int i = 0; i < 25; i++)
+            {
+                GeneratedHash += (unamebytes[i] + (byte)(Math.Pow(-1, i)) * pwordbytes[i]).ToString();
+            }
+
+            return GeneratedHash;
         }
 
         private void StopTest()
@@ -974,6 +1026,9 @@ namespace SoundBored
         private void ShowTestResults()
         { 
             //TODO Display Results of the Test
+
+            WriteHistoryToFile(UserDataPath + UserFileName);
+
             //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
             ChartCanvas.Dispatcher.Invoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
