@@ -50,10 +50,22 @@ namespace SoundBored
         private Label UserNameLabel = new Label();
         private Label PasswordLabel = new Label();
         private Label TitleLabel = new Label();
+        
         private SurfaceButton LoginButton = new SurfaceButton();
-        private SurfaceButton FreePlayButton = new SurfaceButton();
+        private SurfaceButton FreePlaySinglePlayerButton = new SurfaceButton();
+        private SurfaceButton FreePlayTwoPlayerButton = new SurfaceButton();
+        private SurfaceButton LogoutButton = new SurfaceButton();
+        private SurfaceButton RandWalkButton = new SurfaceButton();
+        private SurfaceButton RandAIButton = new SurfaceButton();
+        private SurfaceButton PreloadButton = new SurfaceButton();
+        private SurfaceButton DemoButton = new SurfaceButton();
+        private SurfaceButton MenuButton = new SurfaceButton();
+        private SurfaceButton BackButton = new SurfaceButton();
+
         private SurfaceTextBox UserNameTextBox = new SurfaceTextBox();
         private SurfaceTextBox PasswordTextBox = new SurfaceTextBox();
+
+
 
         private string UserName;
         private string Password;
@@ -75,7 +87,7 @@ namespace SoundBored
 
         private static int LeftMargin = 60;
         private static int TopMargin = 120;
-        private static int pianoWidth = 1920 - (2 * LeftMargin);
+        private static int pianoWidth = 1920 - (2 * LeftMargin) - (int)(1920*.185);
 
         private static PatternUnit CurrentPatternUnit;
         private static int CurrentNote;
@@ -176,7 +188,7 @@ namespace SoundBored
             StartSplashScreen();
         }
 
-        private void InitializeKeyInterface(bool Bigkeys, bool FreePlay, String key)
+        private void TransformKeyInterface(bool Bigkeys, bool FreePlay, String key)
         {
             int tmp;
             int numKeys;
@@ -185,11 +197,9 @@ namespace SoundBored
             BigKeys = Bigkeys;
 
             if (BigKeys)
-            {
-                NoOfKeys = 26;
-            }
-            
-            numKeys = NoOfKeys;
+                numKeys = 26;
+            else
+                numKeys = NoOfKeys;
 
             for (int i = 0; i < numKeys; i++)
             {
@@ -210,7 +220,10 @@ namespace SoundBored
             }
             else
             {
-                TransformToNKeys(NoOfKeys, key);
+                if (twoPlayer)
+                    TransformTwoPlayerNKeys(NoOfKeys, key);
+                else
+                    TransformOnePlayerNKeys(NoOfKeys, key);
             }
 
             if (!FreePlayMode)
@@ -224,6 +237,7 @@ namespace SoundBored
             InitializeLabel();
             InitializeText();
             InitializeButton();
+            TransformStartScreen();
         }
 
         private void InitializeLabel()
@@ -266,10 +280,6 @@ namespace SoundBored
             PasswordLabel.Visibility = System.Windows.Visibility.Visible;
             TitleLabel.Margin = new Thickness(540, 258, 0, 0);
             TitleLabel.Visibility = System.Windows.Visibility.Visible;
-
-            C.Children.Add(UserNameLabel);
-            C.Children.Add(PasswordLabel);
-            C.Children.Add(TitleLabel);
         }
 
         private void InitializeText()
@@ -296,8 +306,7 @@ namespace SoundBored
             PasswordTextBox.Margin = new Thickness(1233, 343, 0, 0);
             PasswordTextBox.Visibility = System.Windows.Visibility.Visible;
 
-            C.Children.Add(UserNameTextBox);
-            C.Children.Add(PasswordTextBox);
+           
         }
 
         private void InitializeButton()
@@ -305,33 +314,165 @@ namespace SoundBored
             LoginButton.Name = "Login";
             LoginButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             LoginButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            LoginButton.Height = 30;
-            LoginButton.Width = 90;
+            LoginButton.Height = 60;
+            LoginButton.Width = 180;
             LoginButton.Content = "Login";
             LoginButton.FontSize = 14;
             LoginButton.Click += Login_Clicked;
 
-            FreePlayButton.Name = "FreePlay";
-            FreePlayButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            FreePlayButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            FreePlayButton.Height = 30;
-            FreePlayButton.Width = 90;
-            FreePlayButton.Content = "Free Play!";
-            FreePlayButton.FontSize = 14;
-            FreePlayButton.Click += FreePlay;
+            FreePlaySinglePlayerButton.Name = "FreePlay";
+            FreePlaySinglePlayerButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            FreePlaySinglePlayerButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            FreePlaySinglePlayerButton.Height = 60;
+            FreePlaySinglePlayerButton.Width = 180;
+            FreePlaySinglePlayerButton.Content = "Free Play!";
+            FreePlaySinglePlayerButton.FontSize = 14;
+            FreePlaySinglePlayerButton.Click += FreePlaySinglePlayer;
+            
+            FreePlayTwoPlayerButton.Name = "TwoplayerFreePlay";
+            FreePlayTwoPlayerButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            FreePlayTwoPlayerButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            FreePlayTwoPlayerButton.Height = 60;
+            FreePlayTwoPlayerButton.Width = 180;
+            FreePlayTwoPlayerButton.Content = "2 Person Free Play!";
+            FreePlayTwoPlayerButton.FontSize = 14;
+            FreePlayTwoPlayerButton.Click += FreePlayTwoPlayer;
 
+            LogoutButton.Name = "Logout";
+            LogoutButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            LogoutButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            LogoutButton.Height = 60;
+            LogoutButton.Width = 180;
+            LogoutButton.Content = "Logout";
+            LogoutButton.FontSize = 14;
+            LogoutButton.Click += Logout_Clicked;
+
+            RandWalkButton.Name = "RandWalk";
+            RandWalkButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            RandWalkButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            RandWalkButton.Height = 60;
+            RandWalkButton.Width = 180;
+            RandWalkButton.Content = "Play Random Walk!";
+            RandWalkButton.FontSize = 14;
+            RandWalkButton.Click += RandWalk_Clicked;
+
+            RandAIButton.Name = "RandAI";
+            RandAIButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            RandAIButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            RandAIButton.Height = 60;
+            RandAIButton.Width = 180;
+            RandAIButton.Content = "Play Random AI!";
+            RandAIButton.FontSize = 14;
+
+            PreloadButton.Name = "Preload";
+            PreloadButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            PreloadButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            PreloadButton.Height = 60;
+            PreloadButton.Width = 180;
+            PreloadButton.Content = "Play Preloaded Song!";
+            PreloadButton.FontSize = 14;
+
+            DemoButton.Name = "Demo";
+            DemoButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            DemoButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            DemoButton.Height = 60;
+            DemoButton.Width = 180;
+            DemoButton.Content = "Play Demo!";
+            DemoButton.FontSize = 14;
+
+            MenuButton.Name = "Menu";
+            MenuButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            MenuButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            MenuButton.Height = 60;
+            MenuButton.Width = 180;
+            MenuButton.Content = "Menu";
+            MenuButton.FontSize = 14;
+            MenuButton.Click += Menu_Clicked;
+
+            BackButton.Name = "Back";
+            BackButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            BackButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            BackButton.Height = 60;
+            BackButton.Width = 180;
+            BackButton.Content = "Back";
+            BackButton.FontSize = 14;
+            BackButton.Click += Logout_Clicked;
+
+            Canvas.SetTop(LogoutButton, 0.0);
+            Canvas.SetLeft(LogoutButton, 0.0);
+            Canvas.SetTop(RandWalkButton, 0.0);
+            Canvas.SetLeft(RandWalkButton, 0.0);
+            Canvas.SetTop(RandAIButton, 0.0);
+            Canvas.SetLeft(RandAIButton, 0.0);
+            Canvas.SetTop(PreloadButton, 0.0);
+            Canvas.SetLeft(PreloadButton, 0.0);
+            Canvas.SetTop(DemoButton, 0.0);
+            Canvas.SetLeft(DemoButton, 0.0);
+
+            Canvas.SetTop(MenuButton, 0.0);
+            Canvas.SetLeft(MenuButton, 0.0);
+
+            Canvas.SetTop(BackButton, 0.0);
+            Canvas.SetLeft(BackButton, 0.0);
+
+            Canvas.SetTop(LoginButton, 0.0);
             Canvas.SetLeft(LoginButton, 0.0);
-            Canvas.SetLeft(LoginButton, 0.0);
-            Canvas.SetTop(FreePlayButton, 0.0);
-            Canvas.SetTop(FreePlayButton, 0.0);
+            Canvas.SetTop(FreePlaySinglePlayerButton, 0.0);
+            Canvas.SetLeft(FreePlaySinglePlayerButton, 0.0);
+            Canvas.SetTop(FreePlayTwoPlayerButton, 0.0);
+            Canvas.SetLeft(FreePlayTwoPlayerButton, 0.0);
+
+            LogoutButton.Margin = new Thickness(1700, 20, 0, 0);
+            LogoutButton.Visibility = System.Windows.Visibility.Visible;
+            RandWalkButton.Margin = new Thickness(320, 395, 0, 0);
+            RandWalkButton.Visibility = System.Windows.Visibility.Visible;
+            RandAIButton.Margin = new Thickness(720, 395, 0, 0);
+            RandAIButton.Visibility = System.Windows.Visibility.Visible;
+            PreloadButton.Margin = new Thickness(1120, 395, 0, 0);
+            PreloadButton.Visibility = System.Windows.Visibility.Visible;
+            DemoButton.Margin = new Thickness(1520, 395, 0, 0);
+            DemoButton.Visibility = System.Windows.Visibility.Visible;
+            
+            MenuButton.Margin = new Thickness(1700, 20, 0, 0);
+            MenuButton.Visibility = System.Windows.Visibility.Visible;
+
+            BackButton.Margin = new Thickness(1700, 20, 0, 0);
+            BackButton.Visibility = System.Windows.Visibility.Visible;
 
             LoginButton.Margin = new Thickness(1266, 395, 0, 0);
             LoginButton.Visibility = System.Windows.Visibility.Visible;
-            FreePlayButton.Margin = new Thickness(620, 395, 0, 0);
-            FreePlayButton.Visibility = System.Windows.Visibility.Visible;
+            FreePlaySinglePlayerButton.Margin = new Thickness(620, 395, 0, 0);
+            FreePlaySinglePlayerButton.Visibility = System.Windows.Visibility.Visible;
+            FreePlayTwoPlayerButton.Margin = new Thickness(620, 595, 0, 0);
+            FreePlayTwoPlayerButton.Visibility = System.Windows.Visibility.Visible;
+            
+        }
 
+        private void TransformStartScreen()
+        {
+            C.Children.Clear();
+
+            C.Children.Add(UserNameLabel);
+            C.Children.Add(PasswordLabel);
+            C.Children.Add(TitleLabel);
+            
+            C.Children.Add(UserNameTextBox);
+            C.Children.Add(PasswordTextBox);
+            
             C.Children.Add(LoginButton);
-            C.Children.Add(FreePlayButton);
+            C.Children.Add(FreePlaySinglePlayerButton);
+            C.Children.Add(FreePlayTwoPlayerButton);
+        }
+
+        private void TransformMenu()
+        {
+            C.Children.Clear();
+
+            C.Children.Add(LogoutButton);
+            C.Children.Add(RandWalkButton);
+            C.Children.Add(RandAIButton);
+            C.Children.Add(PreloadButton);
+            C.Children.Add(DemoButton);
         }
 
         private void InitializeEllipse()
@@ -387,14 +528,14 @@ namespace SoundBored
             Buttons[i].TouchLeave += B_TouchUp;
         }
 
-        //TODO: FIX THIS -- Make sure black keys are proper, Hanging black key in between levels
-        private void TransformToNKeys(int n, String key)
+        //TODO: FIX THIS -- Hanging black key in between levels
+        private void TransformTwoPlayerNKeys(int n, String key)
         {
             UnusedKeys = new HashSet<int>();
 
             C.Children.Clear();
 
-            int LeftAmount = LeftMargin;
+            int LeftAmount = (1920 - pianoWidth) / 2;
             int TopAmount = 600;
             int RectWidth = pianoWidth / 26;
             int RectHeight = 360;
@@ -403,11 +544,11 @@ namespace SoundBored
             {
                 if (i == n/2)
                 {
-                    LeftAmount = LeftMargin;
+                    LeftAmount = (1920 - pianoWidth) / 2;
                     TopAmount = TopMargin;
                     if (twoPlayer)
                     {
-                        LeftAmount = 1920 - 2 * LeftMargin;
+                        LeftAmount = 1920 - LeftAmount - RectWidth;
                         RectWidth = -pianoWidth / 26;
                         TopAmount = TopMargin;
                     }
@@ -441,6 +582,63 @@ namespace SoundBored
                     C.Children.Add(Buttons[i]);
                 }
             }
+            C.Children.Add(BackButton);
+        }
+        // TODO: FIX -- Give the player the middle keys close and the low keys above and left and the high keys above and right
+        private void TransformOnePlayerNKeys(int n, String key)
+        {
+            UnusedKeys = new HashSet<int>();
+
+            C.Children.Clear();
+
+            int LeftAmount = (1920 - pianoWidth) / 2;
+            int TopAmount = 600;
+            int RectWidth = pianoWidth / 26;
+            int RectHeight = 360;
+
+            for (int i = 0; i < NoOfKeys; i++)
+            {
+                if (i == n / 2)
+                {
+                    LeftAmount = (1920 - pianoWidth) / 2;
+                    TopAmount = TopMargin;
+                    if (twoPlayer)
+                    {
+                        LeftAmount = 1920 - LeftAmount - RectWidth;
+                        RectWidth = -pianoWidth / 26;
+                        TopAmount = TopMargin;
+                    }
+                }
+
+                if (Buttons[i].Name.Equals("W" + i))
+                {
+                    Buttons[i].Width = Math.Abs(RectWidth);
+                    Buttons[i].Height = RectHeight;
+                    Buttons[i].Margin = new Thickness(LeftAmount, TopAmount, 0, 0);
+                    Buttons[i].Visibility = System.Windows.Visibility.Visible;
+                    C.Children.Add(Buttons[i]);
+                    LeftAmount += RectWidth;
+                }
+                else
+                {
+                    Buttons[i].Width = Math.Abs(RectWidth) / 2;
+                    Buttons[i].Height = RectHeight - 100;
+                    LeftAmount -= Math.Abs(RectWidth) / 4;
+                    Buttons[i].Margin = new Thickness(LeftAmount, TopAmount, 0, 0);
+                    if (i >= n / 2 && twoPlayer)
+                        Buttons[i].Margin = new Thickness(LeftAmount - RectWidth, TopAmount + 100, 0, 0);
+                    Buttons[i].Visibility = System.Windows.Visibility.Visible;
+                    LeftAmount += Math.Abs(RectWidth) / 4;
+                }
+            }
+            for (int i = 0; i < NoOfKeys; i++)
+            {
+                if (Buttons[i].Name.Equals("B" + i))
+                {
+                    C.Children.Add(Buttons[i]);
+                }
+            }
+            C.Children.Add(BackButton);
         }
 
         //Changes layout to 26 keys 0 - 25
@@ -451,7 +649,7 @@ namespace SoundBored
             C.Children.Clear();
 
             int LeftAmount = 65;
-            int TopAmount = 500;
+            int TopAmount = 600;
             int LeftIncrement = 140;
             int RectWidth = 110;
             int RectHeight = 360;
@@ -461,7 +659,7 @@ namespace SoundBored
                 if (i == 13)
                 {
                     LeftAmount = 65;
-                    TopAmount = 60;
+                    TopAmount = TopMargin;
                 }
 
                 Buttons[i].Width = RectWidth;
@@ -473,6 +671,8 @@ namespace SoundBored
 
                 LeftAmount += LeftIncrement;
             }
+
+            C.Children.Add(MenuButton);
 
             C.Children.Add(E);
         }
@@ -917,7 +1117,7 @@ namespace SoundBored
             sr.Close();
             fs.Close();
 
-            Quarter = 1 / (Tempo / 60);
+            Quarter = 1000.0 / (Tempo / 60);
             Half = 2 * Quarter;
             Whole = 2 * Half;
 
@@ -961,7 +1161,32 @@ namespace SoundBored
 
             ReadHistoryFromFile(UserDataPath + UserFileName);
 
-            InitializeKeyInterface(true, false, "C");
+            //InitializeKeyInterface(true, false, "C");
+            TransformMenu();
+        }
+
+        private void Logout_Clicked(object sender, RoutedEventArgs e)
+        {
+            UserName = null;
+            Password = null;
+            UserNameTextBox.Text = "";
+            PasswordTextBox.Text = "";
+            Console.WriteLine("Logging out...");
+            TransformStartScreen();
+        }
+
+        private void RandWalk_Clicked(object sender, RoutedEventArgs e)
+        {
+            TransformKeyInterface(true, false, "C");
+        }
+
+        private void Menu_Clicked(object sender, RoutedEventArgs e)
+        {
+            ChartCanvas.Children.Remove(MenuButton);
+            StopTest();
+            AppTimer.Enabled = false;
+            ChartCanvas.Visibility = System.Windows.Visibility.Collapsed;
+            TransformMenu();
         }
 
         private string HashGenerate(string UserName, string Password)
@@ -1017,10 +1242,16 @@ namespace SoundBored
 
         }
 
-        private void FreePlay(object sender, RoutedEventArgs e)
+        private void FreePlaySinglePlayer(object sender, RoutedEventArgs e)
         {
             //TODO What happens when you click Free Play
-            InitializeKeyInterface(false, true, "C");
+            twoPlayer = false;
+            TransformKeyInterface(false, true, "C");
+        }
+        private void FreePlayTwoPlayer(object sender, RoutedEventArgs e)
+        {
+            twoPlayer = true;
+            TransformKeyInterface(false, true, "C");
         }
 
         private void ShowTestResults()
@@ -1028,13 +1259,21 @@ namespace SoundBored
             //TODO Display Results of the Test
 
             WriteHistoryToFile(UserDataPath + UserFileName);
-
+            C.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                new Action(
+                    delegate()
+                    {
+                        C.Children.Remove(MenuButton);
+                    }
+                ));
             //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
             ChartCanvas.Dispatcher.Invoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
                 new Action(
                     delegate()
                     {
+                        ChartCanvas.Children.Add(MenuButton);
                         ChartCanvas.Visibility = System.Windows.Visibility.Visible;
                     }
                 ));
