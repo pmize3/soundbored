@@ -42,7 +42,7 @@ namespace SoundBored
         private int NoOfErrorsOnLastNote;
         private TimeSpan LatenessThreshold;
 
-        private static int NoOfKeys = 34;
+        private static int NoOfKeys = 88;
         private HashSet<int> UnusedKeys;
         private Rectangle[] Buttons = new Rectangle[NoOfKeys];
         private Ellipse E = new Ellipse();
@@ -69,6 +69,7 @@ namespace SoundBored
 
         private static int LeftMargin = 60;
         private static int TopMargin = 120;
+        private static int pianoWidth = 1920 - (2 * LeftMargin);
 
         private static PatternUnit CurrentPatternUnit;
         private static int CurrentNote;
@@ -78,6 +79,7 @@ namespace SoundBored
 
         private static Boolean FreePlayMode = true;
         private static Boolean BigKeys = false;
+        private static Boolean twoPlayer = false;
 
         //ArrayList Pattern has elements of type PatternUnit converted to Object, so don't forget data conversions when adding or removing elements from Pattern
         private ArrayList Pattern = new ArrayList();
@@ -167,7 +169,7 @@ namespace SoundBored
             StartSplashScreen();
         }
 
-        private void InitializeKeyInterface(bool Bigkeys, bool FreePlay)
+        private void InitializeKeyInterface(bool Bigkeys, bool FreePlay, String key)
         {
             int tmp;
             int numKeys;
@@ -185,8 +187,8 @@ namespace SoundBored
             for (int i = 0; i < numKeys; i++)
             {
                 Buttons[i] = new Rectangle();
-                tmp = i % (numKeys / 2);
-                if (tmp == 1 || tmp == 3 || tmp == 6 || tmp == 8 || tmp == 10 || tmp == 13 || tmp == 15 || tmp == 18 || tmp == 20 || tmp == 22)
+                tmp = i % (12);
+                if (tmp == 1 || tmp == 4 || tmp == 6 || tmp == 8 || tmp == 11)
                     InitializeBlackKey(i);
                 else
                     InitializeWhiteKey(i);
@@ -201,7 +203,7 @@ namespace SoundBored
             }
             else
             {
-                TransformToNKeys(NoOfKeys);
+                TransformToNKeys(NoOfKeys, key);
             }
 
             if (!FreePlayMode)
@@ -347,11 +349,12 @@ namespace SoundBored
             Canvas.SetTop(Buttons[i], 0.0);
             Buttons[i].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x14, 0x27, 0x76));
             Buttons[i].TouchDown += B_TouchDown;
+            //Buttons[i].TouchUp += B_TouchUp;
         }
 
         private void InitializeWhiteKey(int i)
         {
-            Buttons[i].Name = "B" + i;
+            Buttons[i].Name = "W" + i;
             Buttons[i].HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             Buttons[i].VerticalAlignment = System.Windows.VerticalAlignment.Top;
             Buttons[i].Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x00, 0x00));
@@ -359,6 +362,8 @@ namespace SoundBored
             Canvas.SetTop(Buttons[i], 0.0);
             Buttons[i].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
             Buttons[i].TouchDown += B_TouchDown;
+            Buttons[i].TouchUp += B_TouchUp;
+            Buttons[i].TouchLeave += B_TouchUp;
         }
 
         private void InitializeBlackKey(int i)
@@ -371,10 +376,12 @@ namespace SoundBored
             Canvas.SetTop(Buttons[i], 0.0);
             Buttons[i].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x00, 0x00));
             Buttons[i].TouchDown += B_TouchDown;
+            Buttons[i].TouchUp += B_TouchUp;
+            Buttons[i].TouchLeave += B_TouchUp;
         }
 
-        //TODO: FIX THIS
-        private void TransformToNKeys(int n)
+        //TODO: FIX THIS -- Make sure black keys are proper, Hanging black key in between levels
+        private void TransformToNKeys(int n, String key)
         {
             UnusedKeys = new HashSet<int>();
 
@@ -382,8 +389,7 @@ namespace SoundBored
 
             int LeftAmount = LeftMargin;
             int TopAmount = 600;
-            int LeftIncrement = 100;
-            int RectWidth = 100;
+            int RectWidth = pianoWidth / 26;
             int RectHeight = 360;
 
             for (int i = 0; i < NoOfKeys; i++)
@@ -392,21 +398,44 @@ namespace SoundBored
                 {
                     LeftAmount = LeftMargin;
                     TopAmount = TopMargin;
+                    if (twoPlayer)
+                    {
+                        LeftAmount = 1920 - 2 * LeftMargin;
+                        RectWidth = -pianoWidth / 26;
+                        TopAmount = TopMargin;
+                    }
                 }
-
-                Buttons[i].Width = RectWidth;
-                Buttons[i].Height = RectHeight;
-                Buttons[i].Margin = new Thickness(LeftAmount, TopAmount, 0, 0);
-                Buttons[i].Visibility = System.Windows.Visibility.Visible;
-
-                C.Children.Add(Buttons[i]);
-
-                LeftAmount += LeftIncrement;
+                
+                if (Buttons[i].Name.Equals("W" + i))
+                {
+                    Buttons[i].Width = Math.Abs(RectWidth);
+                    Buttons[i].Height = RectHeight;
+                    Buttons[i].Margin = new Thickness(LeftAmount, TopAmount, 0, 0);
+                    Buttons[i].Visibility = System.Windows.Visibility.Visible;
+                    C.Children.Add(Buttons[i]);
+                    LeftAmount += RectWidth;
+                }
+                else
+                {
+                    Buttons[i].Width = Math.Abs(RectWidth) / 2;
+                    Buttons[i].Height = RectHeight - 100;
+                    LeftAmount -= Math.Abs(RectWidth) / 4;
+                    Buttons[i].Margin = new Thickness(LeftAmount, TopAmount, 0, 0);
+                    if (i >= n / 2 && twoPlayer)
+                        Buttons[i].Margin = new Thickness(LeftAmount-RectWidth, TopAmount+100, 0, 0);
+                    Buttons[i].Visibility = System.Windows.Visibility.Visible;
+                    LeftAmount += Math.Abs(RectWidth) / 4;
+                }
             }
-
-            C.Children.Add(E);
+            for (int i = 0; i < NoOfKeys; i++)
+            {
+                if (Buttons[i].Name.Equals("B"+i))
+                {
+                    C.Children.Add(Buttons[i]);
+                }
+            }
         }
-        
+
         //Changes layout to 26 keys 0 - 25
         private void TransformToThirteenKeys()
         {
@@ -661,12 +690,29 @@ namespace SoundBored
             FrameworkElement fe = e.Source as FrameworkElement;
             Console.WriteLine("__\n [TouchDown] " + fe.Name);
             bool handled = handleButtonPress(fe);
+            int index = int.Parse(fe.Name.Substring(1));
+            if (fe.Name.Substring(0,1).Equals("W"))
+                Buttons[index].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xB1, 0xB1, 0xB1));
+            else
+                Buttons[index].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x42, 0x42, 0x42));
 
             //if (handled)
             //{
             //    HideVisualCue();
             //    ShowVisualCue(getRandomButton());
             //}
+        }
+
+        //Handles releasing rectangles
+        private void B_TouchUp(object sender, TouchEventArgs e)
+        {
+            FrameworkElement fe = e.Source as FrameworkElement;
+            String letter = fe.Name.Substring(0,1);
+            int index = int.Parse(fe.Name.Substring(1));
+            if (letter.Equals("B"))
+                Buttons[index].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x00, 0x00));
+            else
+                Buttons[index].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
         }
 
         private void E_TouchDown(object sender, TouchEventArgs e)
@@ -824,7 +870,7 @@ namespace SoundBored
 
         private void Login_Clicked(object sender, RoutedEventArgs e)
         {
-            InitializeKeyInterface(true, false);
+            InitializeKeyInterface(true, false, "C");
         }
 
         private void StopTest()
@@ -851,7 +897,7 @@ namespace SoundBored
         private void FreePlay(object sender, RoutedEventArgs e)
         {
             //TODO What happens when you click Free Play
-            InitializeKeyInterface(false, true);
+            InitializeKeyInterface(false, true, "C");
         }
 
         private void ShowTestResults()
