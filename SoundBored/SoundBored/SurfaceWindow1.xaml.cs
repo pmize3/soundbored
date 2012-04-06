@@ -65,7 +65,7 @@ namespace SoundBored
         private SurfaceTextBox UserNameTextBox = new SurfaceTextBox();
         private SurfaceTextBox PasswordTextBox = new SurfaceTextBox();
 
-
+        private static ChartData DataPoints = new ChartData();
 
         private string UserName;
         private string Password;
@@ -1004,7 +1004,11 @@ namespace SoundBored
                 Console.Write("N:{0}, D:{1} : ", TempPatternUnit.Note, TempPatternUnit.Duration);
             }
             Console.WriteLine();
-            
+
+            PatternMetrics.Add(new PatternMetric());
+            ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternDifficulty = Difficulty;
+            ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternTimePlayed = DateTime.Now;
+
             return NewPattern;
         }
 
@@ -1149,7 +1153,7 @@ namespace SoundBored
             TimerIncrement = ThirtySecondth;
             AppTimer = new Timer(TimerIncrement);
 
-            //Pattern = GenerateRandomPattern(6, 5);
+            //Pattern = GenerateRandomPattern(6, 1);
             Pattern = ReadPatternFromFile(PatternPath + "RandomPattern.pat");
             CurrentDuration = 0;
             CurrentNoteIndex = -1;
@@ -1274,6 +1278,8 @@ namespace SoundBored
             //TODO Display Results of the Test
 
             WriteHistoryToFile(UserDataPath + UserFileName);
+
+            //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
             C.Dispatcher.Invoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
                 new Action(
@@ -1282,6 +1288,85 @@ namespace SoundBored
                         C.Children.Remove(MenuButton);
                     }
                 ));
+
+            DataPoints = CalculateChartPoints();
+
+            ////NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            //LineGraph.Dispatcher.Invoke(
+            //    System.Windows.Threading.DispatcherPriority.Normal,
+            //    new Action<ChartData>(
+            //        delegate(ChartData DP)
+            //        {
+            //            //LineGraph.SetPointLocations(DP.AccuracyTotalvsTime, 0.0);
+            //        }
+            //    ),
+            //    DataPoints
+            //);
+
+            ////NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            //ColumnGraph.Dispatcher.Invoke(
+            //    System.Windows.Threading.DispatcherPriority.Normal,
+            //    new Action<ChartData>(
+            //        delegate(ChartData DP)
+            //        {
+            //            //ColumnGraph.SetPointLocations(DP.StatusTotalvsPatternNotes, 0.0);
+            //        }
+            //    ),
+            //    DataPoints
+            //);
+
+            ////NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            //HistoryChart.Dispatcher.Invoke(
+            //    System.Windows.Threading.DispatcherPriority.Normal,
+            //    new Action(
+            //        delegate()
+            //        {
+            //            HistoryChart.DataSource = DataPoints.AccuracyTotalvsTime;
+            //        }
+            //    ));
+
+            ////NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            //GapPerformance.Dispatcher.Invoke(
+            //    System.Windows.Threading.DispatcherPriority.Normal,
+            //    new Action<ChartData>(
+            //        delegate(ChartData DP)
+            //        {
+            //            GapPerformance.DataSource = DP.StatusTotalvsPatternNotes;
+            //        }
+            //    ),
+            //    DataPoints
+            //);
+
+            //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            TotAccScr.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                new Action(
+                    delegate()
+                    {
+                        TotAccScr.Content = "" + ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyTotal + "%";
+                    }
+                ));
+
+            //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            ErrAccScr.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                new Action(
+                    delegate()
+                    {
+                        ErrAccScr.Content = "" + ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyError + "%";
+                    }
+                ));
+
+            //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
+            LatAccScr.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                new Action(
+                    delegate()
+                    {
+                        LatAccScr.Content = "" + ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyLate + "%";
+                    }
+                ));
+
             //NECESSARY CRAP IF YOU WANT TO MODIFY ANY CONTROL THAT'S OWNED BY THE MAIN THREAD
             ChartCanvas.Dispatcher.Invoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
@@ -1294,6 +1379,70 @@ namespace SoundBored
                 ));
         }
 
+        private ChartData CalculateChartPoints()
+        {
+            double[] AccuracyTotalvsDifficultyArray = new double[30];
+            double[] AccuracyTotalvsDifficultyCountsArray = new double[30];
+            double[] AccuracyErrorvsDifficultyArray = new double[30];
+            double[] AccuracyErrorvsDifficultyCountsArray = new double[30];
+            double[] AccuracyLatevsDifficultyArray = new double[30];
+            double[] AccuracyLatevsDifficultyCountsArray = new double[30];
+
+            ChartData DP = new ChartData();
+
+            foreach (PatternMetric Metric in PatternMetrics)
+            {
+                DP.AccuracyTotalvsTime.Add(new Point(Metric.PatternTimePlayed.ToFileTime(), Metric.PatternAccuracyTotal));
+                DP.AccuracyErrorvsTime.Add(new Point(Metric.PatternTimePlayed.ToFileTime(), Metric.PatternAccuracyError));
+                DP.AccuracyLatevsTime.Add(new Point(Metric.PatternTimePlayed.ToFileTime(), Metric.PatternAccuracyLate));
+
+                AccuracyTotalvsDifficultyArray[Metric.PatternDifficulty] += Metric.PatternAccuracyTotal;
+                AccuracyTotalvsDifficultyCountsArray[Metric.PatternDifficulty]++;
+                AccuracyErrorvsDifficultyArray[Metric.PatternDifficulty] += Metric.PatternAccuracyError;
+                AccuracyErrorvsDifficultyCountsArray[Metric.PatternDifficulty]++;
+                AccuracyLatevsDifficultyArray[Metric.PatternDifficulty] += Metric.PatternAccuracyLate;
+                AccuracyLatevsDifficultyCountsArray[Metric.PatternDifficulty]++;
+            }
+
+            for (int i = 0; i < 30; i++)
+            {
+                if (AccuracyTotalvsDifficultyCountsArray[i] > 0)
+                {
+                    DP.AccuracyTotalvsDifficulty.Add(new Point(i, (AccuracyTotalvsDifficultyArray[i] / AccuracyTotalvsDifficultyCountsArray[i])));
+                }
+                if (AccuracyErrorvsDifficultyCountsArray[i] > 0)
+                {
+                    DP.AccuracyErrorvsDifficulty.Add(new Point(i, (AccuracyErrorvsDifficultyArray[i] / AccuracyErrorvsDifficultyCountsArray[i])));
+                }
+                if (AccuracyLatevsDifficultyCountsArray[i] > 0)
+                {
+                    DP.AccuracyLatevsDifficulty.Add(new Point(i, (AccuracyLatevsDifficultyArray[i] / AccuracyLatevsDifficultyCountsArray[i])));
+                }
+            }
+
+            for (int i = 0; i < Pattern.Count; i++)
+            {
+                if (((PatternUnit)Pattern[i]).IsLate || ((PatternUnit)Pattern[i]).MadeErrors)
+                {
+                    DP.StatusTotalvsPatternNotes.Add(new Point(i, 4));
+                }
+                else if (((PatternUnit)Pattern[i]).MadeErrors)
+                {
+                    DP.StatusTotalvsPatternNotes.Add(new Point(i, 3));
+                }
+                else if (((PatternUnit)Pattern[i]).IsLate)
+                {
+                    DP.StatusTotalvsPatternNotes.Add(new Point(i, 2));
+                }
+                else
+                {
+                    DP.StatusTotalvsPatternNotes.Add(new Point(i, 1));
+                }
+            }
+
+            return DP;
+        }
+
         private void HandleTimerElapsedEvent(Object Source, ElapsedEventArgs e)
         { 
             //What happens when AppTimer's Elapsed Event Fire
@@ -1304,7 +1453,7 @@ namespace SoundBored
                 {
                     ((PatternUnit)Pattern[CurrentNoteIndex]).MadeErrors = MadeErrorOnLastNote;
                     ((PatternUnit)Pattern[CurrentNoteIndex]).NoOfErrors = NoOfErrorsOnLastNote;
-                    ((PatternUnit)Pattern[CurrentNoteIndex]).IsLate = (((PatternUnit)Pattern[CurrentNoteIndex - 1]).ActualTime - ((PatternUnit)Pattern[CurrentNoteIndex - 1]).CorrectTime) > LatenessThreshold;
+                    ((PatternUnit)Pattern[CurrentNoteIndex]).IsLate = (((PatternUnit)Pattern[CurrentNoteIndex]).ActualTime - ((PatternUnit)Pattern[CurrentNoteIndex]).CorrectTime) > LatenessThreshold;
 
                     AppTimer.Enabled = false;
                     HideVisualCue();
@@ -1596,6 +1745,35 @@ namespace SoundBored
             PatternAccuracyTotal = AccuracyTotal;
             PatternAccuracyError = AccuracyError;
             PatternAccuracyLate = AccuracyLate;
+        }
+    }
+
+    class ChartData
+    {
+        public PointCollection AccuracyTotalvsTime = new PointCollection();
+        public PointCollection AccuracyErrorvsTime = new PointCollection();
+        public PointCollection AccuracyLatevsTime = new PointCollection();
+
+        public PointCollection AccuracyTotalvsDifficulty = new PointCollection();
+        public PointCollection AccuracyErrorvsDifficulty = new PointCollection();
+        public PointCollection AccuracyLatevsDifficulty = new PointCollection();
+
+        public PointCollection StatusTotalvsPatternNotes = new PointCollection();
+
+        public ChartData()
+        { 
+            
+        }
+
+        public ChartData(PointCollection AccuracyTotalvsTime, PointCollection AccuracyErrorvsTime, PointCollection AccuracyLatevsTime,
+            PointCollection AccuracyTotalvsDifficulty, PointCollection AccuracyErrorvsDifficulty, PointCollection AccuracyLatevsDifficulty, PointCollection StatusTotalvsPatternNotes)
+        {
+            this.AccuracyTotalvsTime = AccuracyTotalvsTime;
+            this.AccuracyTotalvsDifficulty = AccuracyTotalvsDifficulty;
+            this.AccuracyErrorvsTime = AccuracyErrorvsTime;
+            this.AccuracyErrorvsDifficulty = AccuracyErrorvsDifficulty;
+            this.AccuracyLatevsTime = AccuracyLatevsTime;
+            this.AccuracyLatevsDifficulty = AccuracyLatevsDifficulty;
         }
     }
 }
