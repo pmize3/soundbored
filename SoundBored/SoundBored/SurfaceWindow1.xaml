@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:s="http://schemas.microsoft.com/surface/2008"
-    Title="SoundBored" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="1080" d:DesignWidth="1940" SizeToContent="WidthAndHeight" xmlns:amq="http://schemas.amcharts.com/quick/wpf/2010/xaml">
+    Title="SoundBored" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="1080" d:DesignWidth="1940" SizeToContent="WidthAndHeight" xmlns:amq="http://schemas.amcharts.com/quick/wpf/2010/xaml" Foreground="Black">
     <Grid>
       <Frame Name="F" Height="1080" Width="1920" HorizontalAlignment="Left" VerticalAlignment="Top" />
         <Canvas Background="Black" Name="C" HorizontalAlignment="Left" Width="1920" VerticalAlignment="Top" Height="1080" Loaded="C_Loaded">

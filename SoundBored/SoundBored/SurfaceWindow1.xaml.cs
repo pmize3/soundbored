@@ -95,6 +95,8 @@ namespace SoundBored
         private static int CurrentNoteIndex;
         private static int KeyMidiNote = 60;
 
+        private static Boolean TestMode = false;
+        private static Boolean DemoMode = false;
         private static Boolean FreePlayMode = true;
         private static Boolean BigKeys = false;
         private static Boolean twoPlayer = false;
@@ -247,25 +249,28 @@ namespace SoundBored
             UserNameLabel.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             UserNameLabel.Content = "Username";
             UserNameLabel.Height = 40;
-            UserNameLabel.Width = 96;
+            UserNameLabel.Width = 180;
             UserNameLabel.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+            UserNameLabel.FontSize = 30;
 
             PasswordLabel.Name = "password";
             PasswordLabel.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             PasswordLabel.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             PasswordLabel.Content = "Password";
             PasswordLabel.Height = 40;
-            PasswordLabel.Width = 96;
+            PasswordLabel.Width = 180;
             PasswordLabel.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+            PasswordLabel.FontSize = 30;
 
             TitleLabel.Name = "Title";
             TitleLabel.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             TitleLabel.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             TitleLabel.Content = "Sound Bored";
-            TitleLabel.Height = 124;
-            TitleLabel.Width = 252;
+            //TitleLabel.Content = "Sensual HEALING!";
+            TitleLabel.Height = 100;
+            TitleLabel.Width = 700;
             TitleLabel.Foreground = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0xFF, 0xFF));
-            TitleLabel.FontSize = 40;
+            TitleLabel.FontSize = 80;
 
             Canvas.SetLeft(UserNameLabel, 0.0);
             Canvas.SetLeft(PasswordLabel, 0.0);
@@ -274,11 +279,11 @@ namespace SoundBored
             Canvas.SetTop(PasswordLabel, 0.0);
             Canvas.SetTop(TitleLabel, 0.0);
 
-            UserNameLabel.Margin = new Thickness(1104, 289, 0, 0);
+            UserNameLabel.Margin = new Thickness(1024, 289, 0, 0);
             UserNameLabel.Visibility = System.Windows.Visibility.Visible;
-            PasswordLabel.Margin = new Thickness(1104, 338, 0, 0);
+            PasswordLabel.Margin = new Thickness(1024, 338, 0, 0);
             PasswordLabel.Visibility = System.Windows.Visibility.Visible;
-            TitleLabel.Margin = new Thickness(540, 258, 0, 0);
+            TitleLabel.Margin = new Thickness(400, 250, 0, 0);
             TitleLabel.Visibility = System.Windows.Visibility.Visible;
         }
 
@@ -288,13 +293,13 @@ namespace SoundBored
             UserNameTextBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             UserNameTextBox.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             UserNameTextBox.Height = 23;
-            UserNameTextBox.Width = 120;
+            UserNameTextBox.Width = 200;
 
             PasswordTextBox.Name = "password";
             PasswordTextBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             PasswordTextBox.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             PasswordTextBox.Height = 23;
-            PasswordTextBox.Width = 120;
+            PasswordTextBox.Width = 200;
 
             Canvas.SetLeft(UserNameTextBox, 0.0);
             Canvas.SetLeft(PasswordTextBox, 0.0);
@@ -315,9 +320,9 @@ namespace SoundBored
             LoginButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             LoginButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             LoginButton.Height = 60;
-            LoginButton.Width = 180;
+            LoginButton.Width = 120;
             LoginButton.Content = "Login";
-            LoginButton.FontSize = 14;
+            LoginButton.FontSize = 30;
             LoginButton.Click += Login_Clicked;
 
             FreePlaySinglePlayerButton.Name = "FreePlay";
@@ -326,76 +331,78 @@ namespace SoundBored
             FreePlaySinglePlayerButton.Height = 60;
             FreePlaySinglePlayerButton.Width = 180;
             FreePlaySinglePlayerButton.Content = "Free Play!";
-            FreePlaySinglePlayerButton.FontSize = 14;
+            FreePlaySinglePlayerButton.FontSize = 30;
             FreePlaySinglePlayerButton.Click += FreePlaySinglePlayer;
             
             FreePlayTwoPlayerButton.Name = "TwoplayerFreePlay";
             FreePlayTwoPlayerButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             FreePlayTwoPlayerButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             FreePlayTwoPlayerButton.Height = 60;
-            FreePlayTwoPlayerButton.Width = 180;
-            FreePlayTwoPlayerButton.Content = "2 Person Free Play!";
-            FreePlayTwoPlayerButton.FontSize = 14;
+            FreePlayTwoPlayerButton.Width = 330;
+            FreePlayTwoPlayerButton.Content = "Two Person Free Play!";
+            FreePlayTwoPlayerButton.FontSize = 30;
             FreePlayTwoPlayerButton.Click += FreePlayTwoPlayer;
 
             LogoutButton.Name = "Logout";
             LogoutButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             LogoutButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             LogoutButton.Height = 60;
-            LogoutButton.Width = 180;
+            LogoutButton.Width = 120;
             LogoutButton.Content = "Logout";
-            LogoutButton.FontSize = 14;
+            LogoutButton.FontSize = 30;
             LogoutButton.Click += Logout_Clicked;
 
             RandWalkButton.Name = "RandWalk";
             RandWalkButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             RandWalkButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             RandWalkButton.Height = 60;
-            RandWalkButton.Width = 180;
+            RandWalkButton.Width = 300;
             RandWalkButton.Content = "Play Random Walk!";
-            RandWalkButton.FontSize = 14;
+            RandWalkButton.FontSize = 30;
             RandWalkButton.Click += RandWalk_Clicked;
 
             RandAIButton.Name = "RandAI";
             RandAIButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             RandAIButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             RandAIButton.Height = 60;
-            RandAIButton.Width = 180;
-            RandAIButton.Content = "Play Random AI!";
-            RandAIButton.FontSize = 14;
+            RandAIButton.Width = 300;
+            RandAIButton.Content = "Play AI Generated!";
+            RandAIButton.FontSize = 30;
 
             PreloadButton.Name = "Preload";
             PreloadButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             PreloadButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             PreloadButton.Height = 60;
-            PreloadButton.Width = 180;
-            PreloadButton.Content = "Play Preloaded Song!";
-            PreloadButton.FontSize = 14;
+            PreloadButton.Width = 280;
+            PreloadButton.Content = "Play Preloaded!";
+            PreloadButton.FontSize = 30;
+            // FIX THIS!!! PreloadButton.Click += blo_bhol;
 
             DemoButton.Name = "Demo";
             DemoButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             DemoButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             DemoButton.Height = 60;
-            DemoButton.Width = 180;
+            DemoButton.Width = 250;
             DemoButton.Content = "Play Demo!";
-            DemoButton.FontSize = 14;
+            DemoButton.FontSize = 30;
+            DemoButton.Click += Demo_Clicked;
 
             MenuButton.Name = "Menu";
             MenuButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             MenuButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             MenuButton.Height = 60;
-            MenuButton.Width = 180;
+            MenuButton.Width = 120;
             MenuButton.Content = "Menu";
-            MenuButton.FontSize = 14;
+            MenuButton.FontSize = 30;
             MenuButton.Click += Menu_Clicked;
 
             BackButton.Name = "Back";
             BackButton.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             BackButton.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             BackButton.Height = 60;
-            BackButton.Width = 180;
+            BackButton.Width = 120;
             BackButton.Content = "Back";
-            BackButton.FontSize = 14;
+            BackButton.FontSize = 30;
             BackButton.Click += Logout_Clicked;
 
             Canvas.SetTop(LogoutButton, 0.0);
@@ -439,11 +446,11 @@ namespace SoundBored
             BackButton.Margin = new Thickness(1700, 20, 0, 0);
             BackButton.Visibility = System.Windows.Visibility.Visible;
 
-            LoginButton.Margin = new Thickness(1266, 395, 0, 0);
+            LoginButton.Margin = new Thickness(1315, 410, 0, 0);
             LoginButton.Visibility = System.Windows.Visibility.Visible;
-            FreePlaySinglePlayerButton.Margin = new Thickness(620, 395, 0, 0);
+            FreePlaySinglePlayerButton.Margin = new Thickness(620, 495, 0, 0);
             FreePlaySinglePlayerButton.Visibility = System.Windows.Visibility.Visible;
-            FreePlayTwoPlayerButton.Margin = new Thickness(620, 595, 0, 0);
+            FreePlayTwoPlayerButton.Margin = new Thickness(620, 695, 0, 0);
             FreePlayTwoPlayerButton.Visibility = System.Windows.Visibility.Visible;
             
         }
@@ -782,7 +789,16 @@ namespace SoundBored
                         E.Width = R.Width;
                         E.Visibility = System.Windows.Visibility.Visible;
                         E.Margin = new Thickness(R.Margin.Left, R.Margin.Top, 0, 0);
-                        E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0x00, 0xFF, 0xFF));
+                        
+                        if (!DemoMode)
+                        {
+                            E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0x00, 0xFF, 0xFF));
+                        }
+                        else
+                        {
+                            E.Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xDD, 0xFF, 0x62, 0x70));
+                        }
+
                         E.Stroke = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xA0, 0x00, 0xFF, 0xFF));
                     }
                 ));
@@ -901,7 +917,7 @@ namespace SoundBored
             if (fe.Name.Substring(0,1).Equals("W"))
                 Buttons[index].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0xB1, 0xB1, 0xB1));
             else
-                Buttons[index].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x42, 0x42, 0x42));
+                Buttons[index].Fill = new System.Windows.Media.SolidColorBrush(Color.FromArgb(0xFF, 0x72, 0x72, 0x72));   // Ox42
 
             //if (handled)
             //{
@@ -1153,7 +1169,7 @@ namespace SoundBored
             TimerIncrement = ThirtySecondth;
             AppTimer = new Timer(TimerIncrement);
 
-            //Pattern = GenerateRandomPattern(6, 1);
+            //Pattern = GenerateRandomPattern(6, 10);
             Pattern = ReadPatternFromFile(PatternPath + "RandomPattern.pat");
             CurrentDuration = 0;
             CurrentNoteIndex = -1;
@@ -1196,6 +1212,8 @@ namespace SoundBored
 
         private void RandWalk_Clicked(object sender, RoutedEventArgs e)
         {
+            TestMode = true;
+            DemoMode = true;
             TransformKeyInterface(true, false, "C");
         }
 
@@ -1460,7 +1478,20 @@ namespace SoundBored
 
                     CalculateAccuracy();
 
-                    ShowTestResults();
+                    if (DemoMode)
+                    {
+                        PatternMetrics.RemoveAt(PatternMetrics.Count - 1);
+                        DemoMode = false;
+                        if (TestMode)
+                        {
+                            StartTest();
+                        }
+                    }
+                    else
+                    {
+                        TestMode = false;
+                        ShowTestResults();
+                    }
 
                     Console.WriteLine("Test Done : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
                     return;
@@ -1500,6 +1531,10 @@ namespace SoundBored
                 Console.WriteLine("CNI < 0 : CDur = 0 : " + e.SignalTime.Minute + ":" + e.SignalTime.Second + ":" + e.SignalTime.Millisecond);
                 CurrentDuration = 0;
             }
+            else if (DemoMode)
+            {
+                CurrentDuration--;
+            }
             else if (IsPlayed && EIdx >= 0)
             {
                 ((PatternUnit)Pattern[CurrentNoteIndex]).ActualTime = LastPlayedTime;
@@ -1538,6 +1573,12 @@ namespace SoundBored
             ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyTotal = AccuracyTotal;
             ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyError = AccuracyErrorOnly;
             ((PatternMetric)PatternMetrics[PatternMetrics.Count - 1]).PatternAccuracyLate = AccuracyLateOnly;
+        }
+
+        public void Demo_Clicked(object Sender, RoutedEventArgs e)
+        {
+            DemoMode = true;
+            TransformKeyInterface(true, false, "C");
         }
     }
 
