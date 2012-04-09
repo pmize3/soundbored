@@ -16,7 +16,7 @@
             </amq:SerialChart>
             <amq:SerialChart Canvas.Left="420" Canvas.Top="740" Height="243" Name="GapPerformance" Width="980">
                 <amq:SerialChart.Graphs>
-                    <amq:ColumnGraph Name="ColumnGraph" Background="Black" BorderBrush="Cyan" Brush="Cyan" Title="Gap Performance" DataContext="{Binding}" />
+                    <amq:ColumnGraph Name="ColumnGraph" Background="Black" BorderBrush="Cyan" Brush="Cyan" Title="Gap Performance" />
                 </amq:SerialChart.Graphs>
             </amq:SerialChart>
             <Label Canvas.Left="768" Canvas.Top="63" Content="Results" Height="80" Name="ResultLabel" Width="315" Foreground="#CC00FFFF" FontSize="56" />
